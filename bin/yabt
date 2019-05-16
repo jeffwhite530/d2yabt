@@ -1,0 +1,193 @@
+#!/usr/bin/env python3
+
+
+
+# pylint: disable=line-too-long
+
+
+
+import yabt
+import sys
+import os
+import argparse
+import zipfile
+import gzip
+import shutil
+import json
+import re
+import pandas
+
+
+
+def decompress_bundle(bundle_name):
+	"""Expand the bundle into a directory unless that directory already exists.
+	"""
+	# TODO: Handle corrupt .zip files.  Maybe fall back to using p7zip?
+
+	if os.path.isfile(bundle_name) and bundle_name.endswith(".zip"):
+		bundle_dir = bundle_name[:-4]
+
+		if os.path.exists(bundle_dir):
+			print("Bundle has already been extracted, using existing directory")
+
+		else:
+			print("Extracting bundle to", bundle_dir)
+
+			os.mkdir(bundle_dir)
+
+			zip_ref = zipfile.ZipFile(bundle_name, "r")
+			zip_ref.extractall(bundle_dir)
+			zip_ref.close()
+
+	elif os.path.isdir(bundle_name):
+		bundle_dir = bundle_name
+
+	else:
+		print("Unable to extract bundle.  Not named with .zip?", file=sys.stderr)
+
+		sys.exit(1)
+
+	return bundle_dir
+
+
+
+def decompress_bundle_files(bundle_dir):
+	"""Expand compressed files within the bundle.
+	"""
+	print("Expanding bundle files")
+
+	for root, dirs, files in os.walk(bundle_dir):
+		for each_file in files:
+			if not each_file.endswith(".gz"):
+				continue
+
+			file_with_path = root + os.sep + each_file
+
+			file_with_path_no_ext = file_with_path[:-3]
+
+			with gzip.open(file_with_path, "rb") as f_in:
+				with open(file_with_path_no_ext, "wb") as f_out:
+					shutil.copyfileobj(f_in, f_out)
+
+			os.remove(file_with_path)
+
+
+
+def get_nodes(bundle_dir):
+	"""Get the list of nodes and create an object for each.
+	"""
+	print("Obtaining list of nodes")
+
+	node_objs = list()
+
+	for node_dir in os.listdir(bundle_dir):
+		if not os.path.isdir(bundle_dir + os.sep + node_dir):
+			continue
+
+		node_obj = yabt.Node()
+		node_obj.dir = bundle_dir + os.sep + node_dir
+
+		if node_dir.endswith("_master"):
+			node_obj.ip = node_dir[:-7]
+			node_obj.type = "master"
+
+		elif node_dir.endswith("_agent"):
+			node_obj.ip = node_dir[:-6]
+			node_obj.type = "priv_agent"
+
+		elif node_dir.endswith("_agent_public"):
+			node_obj.ip = node_dir[:-13]
+			node_obj.type = "pub_agent"
+
+		node_objs.append(node_obj)
+
+
+	# Print the node table
+	node_table = pandas.DataFrame(data = {
+			"IP": [o.ip for o in node_objs],
+			"Type": [o.type for o in node_objs],
+		}
+	)
+
+	node_table.sort_values("Type", inplace=True)
+
+	node_table.reset_index(inplace=True, drop=True)
+
+	node_table.index += 1
+
+	print(node_table)
+
+
+	return node_objs
+
+
+
+if __name__ == "__main__":
+	# What options were we called with?
+	parser = argparse.ArgumentParser(description="Yet Another Bundle Tool: A tool used to analyze DC/OS diagnostic bundles")
+
+	parser.add_argument("-d", "--debug", dest="debug_mode",
+							default=False, action="store_true",
+							help="Enable debug mode")
+
+	parser.add_argument("bundle_name", metavar="bundle_name",
+							type=str, nargs="+",
+							help="The bundle file or directory")
+
+	# TODO: Add option to only look at a specific node
+	# TODO: Add option to do checks and only extract unless given this or another option
+	# TODO: Add option to list what checks will be done
+	# TODO: Add option to do "deep inspect" checks (e.g. show when ooms happened and what processes were killed)
+	# TODO: Add option to list what "deep inspect" checks are available
+
+	yabt_args = parser.parse_args()
+
+
+	# Verify we have a bundle arg
+	if not len(yabt_args.bundle_name) == 1:
+		print("Invalid number of bundle names passed, shell quoting problem?", file=sys.stderr)
+
+		sys.exit(1)
+
+	else:
+		bundle_name = yabt_args.bundle_name[0]
+
+
+	# TODO: Support one-liner logs
+
+
+	# Does the named bundle exist?
+	if not os.path.exists(bundle_name):
+		print("No such bundle found:", bundle_name, file=sys.stderr)
+
+		sys.exit(1)
+
+
+	# Decompress the bundle and the files within it
+	bundle_dir = decompress_bundle(bundle_name)
+
+	decompress_bundle_files(bundle_dir)
+
+
+	# Create the node objects list
+	node_objs = get_nodes(bundle_dir)
+
+	if len(node_objs) == 0:
+		raise(Exception("Failed to find any nodes in the bundle directory"))
+
+
+	# Health checks	
+	yabt.check.dcos_version(node_objs)
+	yabt.check.firewall_running(node_objs)
+	yabt.check.missing_agents(node_objs)
+	yabt.check.time_sync(node_objs)
+	yabt.check.kmem_presence(node_objs)
+	yabt.check.zk_fsync(node_objs)
+	yabt.check.oom_presence(node_objs)
+	yabt.check.crdb_ranges(node_objs)
+
+	# TODO: check_zk()
+	# Unexpected exception, tries=3, connecting to /10.121.48.65:2888
+
+	# TODO: check_mesos_master()
+
