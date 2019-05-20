@@ -16,6 +16,7 @@ import shutil
 import json
 import re
 import pandas
+import tarfile
 
 
 
@@ -24,7 +25,7 @@ def decompress_bundle(bundle_name):
 	"""
 	# TODO: Handle corrupt .zip files.  Maybe fall back to using p7zip?
 
-	if os.path.isfile(bundle_name) and bundle_name.endswith(".zip"):
+	if os.path.isfile(bundle_name):
 		bundle_dir = bundle_name[:-4]
 
 		if os.path.exists(bundle_dir):
@@ -42,10 +43,32 @@ def decompress_bundle(bundle_name):
 	elif os.path.isdir(bundle_name):
 		bundle_dir = bundle_name
 
-	else:
-		print("Unable to extract bundle.  Not named with .zip?", file=sys.stderr)
+	return bundle_dir
 
-		sys.exit(1)
+
+def decompress_oneliner(bundle_name):
+	"""Expand the one-liner bundle into a directory unless that directory already exists.
+	"""
+
+	if os.path.isfile(bundle_name):
+		bundle_dir = bundle_name[:-4]
+
+		if os.path.exists(bundle_dir):
+			print("Bundle has already been extracted, using existing directory")
+
+		else:
+			os.mkdir(bundle_dir)
+
+			print("Extracting oneliner bundle to", bundle_dir)
+
+			tarfile_obj = tarfile.open(bundle_name, "r:gz")
+
+			tarfile_obj.extractall(bundle_dir)
+
+			tarfile_obj.close()
+
+	elif os.path.isdir(bundle_name):
+		bundle_dir = bundle_name
 
 	return bundle_dir
 
@@ -73,33 +96,56 @@ def decompress_bundle_files(bundle_dir):
 
 
 
-def get_nodes(bundle_dir):
+def get_nodes(bundle_dir, bundle_type):
 	"""Get the list of nodes and create an object for each.
 	"""
 	print("Obtaining list of nodes")
 
 	node_objs = list()
 
-	for node_dir in os.listdir(bundle_dir):
-		if not os.path.isdir(bundle_dir + os.sep + node_dir):
-			continue
-
+	if bundle_type == "oneliner_bundle":
 		node_obj = yabt.Node()
-		node_obj.dir = bundle_dir + os.sep + node_dir
 
-		if node_dir.endswith("_master"):
-			node_obj.ip = node_dir[:-7]
+		node_obj.dir = bundle_dir
+
+		node_obj.ip = "unknown"
+
+		if os.path.exists(bundle_dir + os.sep + "dcos-mesos-master.service.log"):
 			node_obj.type = "master"
 
-		elif node_dir.endswith("_agent"):
-			node_obj.ip = node_dir[:-6]
+		elif os.path.exists(bundle_dir + os.sep + "dcos-mesos-slave.service.log"):
 			node_obj.type = "priv_agent"
 
-		elif node_dir.endswith("_agent_public"):
-			node_obj.ip = node_dir[:-13]
+		elif os.path.exists(bundle_dir + os.sep + "dcos-mesos-slave-public.service.log"):
 			node_obj.type = "pub_agent"
 
 		node_objs.append(node_obj)
+
+	elif bundle_type == "diag_bundle":
+		for node_dir in os.listdir(bundle_dir):
+			if not os.path.isdir(bundle_dir + os.sep + node_dir):
+				continue
+
+			node_obj = yabt.Node()
+			node_obj.dir = bundle_dir + os.sep + node_dir
+
+			if node_dir.endswith("_master"):
+				node_obj.ip = node_dir[:-7]
+				node_obj.type = "master"
+
+			elif node_dir.endswith("_agent"):
+				node_obj.ip = node_dir[:-6]
+				node_obj.type = "priv_agent"
+
+			elif node_dir.endswith("_agent_public"):
+				node_obj.ip = node_dir[:-13]
+				node_obj.type = "pub_agent"
+
+			node_objs.append(node_obj)
+
+
+	if len(node_objs) == 0:
+		raise(Exception("Failed to find any nodes in the bundle directory"))
 
 
 	# Print the node table
@@ -164,27 +210,39 @@ if __name__ == "__main__":
 
 
 	# Decompress the bundle and the files within it
-	bundle_dir = decompress_bundle(bundle_name)
+	if bundle_name.endswith(".zip") or os.path.exists(bundle_name + os.sep + "summaryReport.txt"):
+		bundle_type = "diag_bundle"
 
-	decompress_bundle_files(bundle_dir)
+		bundle_dir = decompress_bundle(bundle_name)
+
+		decompress_bundle_files(bundle_dir)
+
+	elif bundle_name.endswith(".tgz"):
+		bundle_type = "oneliner_bundle"
+
+		bundle_dir = decompress_oneliner(bundle_name)
+
+	# FIXME: Support alread-extracted oneliner bundle
 
 
 	# Create the node objects list
-	node_objs = get_nodes(bundle_dir)
-
-	if len(node_objs) == 0:
-		raise(Exception("Failed to find any nodes in the bundle directory"))
+	node_objs = get_nodes(bundle_dir, bundle_type)
 
 
-	# Health checks	
-	yabt.check.dcos_version(node_objs)
-	yabt.check.firewall_running(node_objs)
+	# Health checks
+	if bundle_type == "diag_bundle":
+		yabt.check.dcos_version(node_objs)
+		yabt.check.firewall_running(node_objs)
+
 	yabt.check.missing_agents(node_objs)
 	yabt.check.time_sync(node_objs)
 	yabt.check.kmem_presence(node_objs)
 	yabt.check.zk_fsync(node_objs)
 	yabt.check.oom_presence(node_objs)
 	yabt.check.crdb_ranges(node_objs)
+
+	# TODO: check_zk_full_disk()
+	# No space left on device
 
 	# TODO: check_zk()
 	# Unexpected exception, tries=3, connecting to /10.121.48.65:2888

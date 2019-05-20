@@ -115,7 +115,13 @@ def missing_agents(node_objs):
 		if not node_obj.type == "master":
 			continue
 
-		with open(node_obj.dir + os.sep + "dcos-mesos-master.service", "r") as mesos_master_log:
+		if os.path.exists(node_obj.dir + os.sep + "dcos-mesos-master.service"):
+			mesos_log = node_obj.dir + os.sep + "dcos-mesos-master.service"
+
+		elif os.path.exists(node_obj.dir + os.sep + "dcos-mesos-master.service.log"):
+			mesos_log = node_obj.dir + os.sep + "dcos-mesos-master.service.log"
+
+		with open(mesos_log, "r") as mesos_master_log:
 			for each_line in mesos_master_log:
 				each_line = each_line.rstrip("\n")
 
@@ -214,6 +220,9 @@ def kmem_presence(node_objs):
 		elif os.path.exists(node_obj.dir + os.sep + "dmesg-0.output"):
 			dmesg_file = node_obj.dir + os.sep + "dmesg-0.output"
 
+		elif os.path.exists(node_obj.dir + os.sep + "dmesg_t.log"):
+			dmesg_file = node_obj.dir + os.sep + "dmesg_t.log"
+
 		else:
 			print("Unable to search for kmem bug, no dmesg file found")
 
@@ -260,7 +269,13 @@ def zk_fsync(node_objs):
 		if not node_obj.type == "master":
 			continue
 
-		with open(node_obj.dir + os.sep + "dcos-exhibitor.service", "r") as zk_file_handle:
+		if os.path.exists(node_obj.dir + os.sep + "dcos-exhibitor.service"):
+			exhibitor_log = node_obj.dir + os.sep + "dcos-exhibitor.service"
+
+		elif os.path.exists(node_obj.dir + os.sep + "dcos-exhibitor.service.log"):
+			exhibitor_log = node_obj.dir + os.sep + "dcos-exhibitor.service.log"
+
+		with open(exhibitor_log, "r") as zk_file_handle:
 			for each_line in zk_file_handle:
 				each_line = each_line.rstrip("\n")
 
@@ -313,6 +328,9 @@ def oom_presence(node_objs):
 		elif os.path.exists(node_obj.dir + os.sep + "dmesg-0.output"):
 			dmesg_file = node_obj.dir + os.sep + "dmesg-0.output"
 
+		elif os.path.exists(node_obj.dir + os.sep + "dmesg_t.log"):
+			dmesg_file = node_obj.dir + os.sep + "dmesg_t.log"
+
 		else:
 			print("Unable to search for ooms, no dmesg file found")
 
@@ -364,7 +382,13 @@ def crdb_ranges(node_objs):
 		if not node_obj.type == "master":
 			continue
 
-		with open(node_obj.dir + os.sep + "dcos-checks-poststart.service", "r") as poststart_file:
+		if os.path.exists(node_obj.dir + os.sep + "dcos-checks-poststart.service"):
+			poststart_log = node_obj.dir + os.sep + "dcos-checks-poststart.service"
+
+		elif os.path.exists(node_obj.dir + os.sep + "dcos-checks-poststart.service.log"):
+			poststart_log = node_obj.dir + os.sep + "dcos-checks-poststart.service.log"
+
+		with open(poststart_log, "r") as poststart_file:
 			for each_line in poststart_file:
 				each_line = each_line.rstrip("\n")
 			
