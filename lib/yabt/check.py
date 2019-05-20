@@ -295,13 +295,59 @@ def zk_fsync(node_objs):
 	if not len(zk_fsync_node_objs) == 0:
 		node_table = pandas.DataFrame(data = {
 				"IP": [o.ip for o in zk_fsync_node_objs],
-				"Type": [o.type for o in zk_fsync_node_objs],
 				"ZK fsync Warnings": [o.zk_fsync_warning_count for o in zk_fsync_node_objs],
 				"ZK Longest fsyncs (ms)": [o.get_longest_zk_fsyncs() for o in zk_fsync_node_objs],
 			}
 		)
 
 		node_table.sort_values("ZK fsync Warnings", inplace=True, ascending=False)
+
+		node_table.reset_index(inplace=True, drop=True)
+
+		node_table.index += 1
+
+		print(node_table)
+
+
+
+def zk_diskspace(node_objs):
+	"""Check for disk space errors in ZooKeeper.
+	"""
+	print("Checking for disk space errors in ZooKeeper")
+
+	zk_diskspace_node_objs = list()
+
+	for node_obj in node_objs:
+		if not node_obj.type == "master":
+			continue
+
+		if os.path.exists(node_obj.dir + os.sep + "dcos-exhibitor.service"):
+			exhibitor_log = node_obj.dir + os.sep + "dcos-exhibitor.service"
+
+		elif os.path.exists(node_obj.dir + os.sep + "dcos-exhibitor.service.log"):
+			exhibitor_log = node_obj.dir + os.sep + "dcos-exhibitor.service.log"
+
+		with open(exhibitor_log, "r") as zk_file_handle:
+			for each_line in zk_file_handle:
+				each_line = each_line.rstrip("\n")
+
+				if re.search("No space left on device", each_line) is not None:
+					node_obj.zk_diskspace_error_found = True
+
+					zk_diskspace_node_objs.append(node_obj)
+
+					break
+
+
+	# Print the node table
+	if not len(zk_diskspace_node_objs) == 0:
+		node_table = pandas.DataFrame(data = {
+				"IP": [o.ip for o in zk_diskspace_node_objs],
+				"ZK Disk Space Error": [o.zk_diskspace_error_found for o in zk_diskspace_node_objs],
+			}
+		)
+
+		node_table.sort_values("ZK Disk Space Error", inplace=True, ascending=False)
 
 		node_table.reset_index(inplace=True, drop=True)
 

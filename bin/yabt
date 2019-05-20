@@ -238,6 +238,7 @@ if __name__ == "__main__":
 	yabt.check.time_sync(node_objs)
 	yabt.check.kmem_presence(node_objs)
 	yabt.check.zk_fsync(node_objs)
+	yabt.check.zk_diskspace(node_objs)
 	yabt.check.oom_presence(node_objs)
 	yabt.check.crdb_ranges(node_objs)
 
