@@ -360,7 +360,7 @@ def zk_diskspace(node_objs):
 def oom_presence(node_objs):
 	"""Check for out-of-memory events.
 	"""
-	print("Checking of ooms")
+	print("Checking for ooms")
 
 	oom_node_objs = list()
 
