@@ -88,11 +88,16 @@ def decompress_bundle_files(bundle_dir):
 
 			file_with_path_no_ext = file_with_path[:-3]
 
-			with gzip.open(file_with_path, "rb") as f_in:
-				with open(file_with_path_no_ext, "wb") as f_out:
-					shutil.copyfileobj(f_in, f_out)
+			try:
+				with gzip.open(file_with_path, "rb") as f_in:
+					with open(file_with_path_no_ext, "wb") as f_out:
+						shutil.copyfileobj(f_in, f_out)
 
-			os.remove(file_with_path)
+			except EOFError:
+				print("Failed to expand", file_with_path, "EOF reached, incomplete file?")
+
+			else:
+				os.remove(file_with_path)
 
 
 
@@ -240,10 +245,12 @@ if __name__ == "__main__":
 	yabt.check.zk_fsync(node_objs)
 	yabt.check.zk_diskspace(node_objs)
 	yabt.check.oom_presence(node_objs)
-	yabt.check.crdb_ranges(node_objs)
 
-	# TODO: check_zk_full_disk()
-	# No space left on device
+	try:
+		yabt.check.crdb_ranges(node_objs)
+
+	except Exception as err:
+		print("Failed to check CRDB:", err, file=sys.stderr)
 
 	# TODO: check_zk()
 	# Unexpected exception, tries=3, connecting to /10.121.48.65:2888

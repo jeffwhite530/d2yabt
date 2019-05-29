@@ -386,6 +386,7 @@ def oom_presence(node_objs):
 			for each_line in dmesg_file_handle:
 				each_line = each_line.rstrip("\n")
 
+				# FIXME: Get the killed process not the one that invoked oom-killer
 				match = re.search("\s+([^\s]+)\sinvoked oom-killer", each_line)
 
 				if match is not None:
@@ -433,6 +434,9 @@ def crdb_ranges(node_objs):
 
 		elif os.path.exists(node_obj.dir + os.sep + "dcos-checks-poststart.service.log"):
 			poststart_log = node_obj.dir + os.sep + "dcos-checks-poststart.service.log"
+
+		else:
+			raise Exception("No dcos-checks-poststart.service log found")
 
 		with open(poststart_log, "r") as poststart_file:
 			for each_line in poststart_file:
