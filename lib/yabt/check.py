@@ -387,7 +387,7 @@ def oom_presence(node_objs):
 				each_line = each_line.rstrip("\n")
 
 				# FIXME: Get the killed process not the one that invoked oom-killer
-				match = re.search("\s+([^\s]+)\sinvoked oom-killer", each_line)
+				match = re.search("Killed process \d+ \(([^\s]+)\)", each_line)
 
 				if match is not None:
 					node_obj.oom_invoked_count += 1
