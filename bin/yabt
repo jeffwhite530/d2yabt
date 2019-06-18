@@ -204,7 +204,7 @@ if __name__ == "__main__":
 		bundle_name = yabt_args.bundle_name[0]
 
 
-	# TODO: Support one-liner logs
+	# TODO: Support service diagnostic bundles
 
 
 	# Does the named bundle exist?
@@ -227,7 +227,14 @@ if __name__ == "__main__":
 
 		bundle_dir = decompress_oneliner(bundle_name)
 
-	# FIXME: Support alread-extracted oneliner bundle
+	elif os.path.isdir(bundle_name):
+		bundle_dir = bundle_name
+		bundle_type = "diag_bundle"
+
+	else:
+		print("Unable to determine bundle type", file=sys.stderr)
+
+	# FIXME: Support already-extracted oneliner bundle
 
 
 	# Create the node objects list
