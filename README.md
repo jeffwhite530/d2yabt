@@ -3,6 +3,12 @@ yabt (Yet Another Bundle Tool) is used to analyze [DC/OS diagnostic bundles](htt
 1. Decompresses the bundle (also supports one-liner bundles; service diagnostic bundle support is TODO)
 2. Reads JSON and log files to find common problems and warns about them
 
+### To run
+Assuming yabt in in your home directory, you'll need to adjust PYTHONPATH so it can find the lib like so:
+```
+PYTHONPATH=$PYTHONPATH:~/yabt/lib ~/yabt/bin/yabt
+```
+
 ### To add checks
 
 yabt was designed to be easily extended and have a simple to understand architecture.  To add a check, add a function to lib/yabt/check.py that does anything you want it to do.  Then simply add a call to that function in bin/yabt.
