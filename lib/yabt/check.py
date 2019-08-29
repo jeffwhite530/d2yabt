@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+"""This module contains all of the checks that yabt uses.
+"""
 
 
 
@@ -6,9 +8,7 @@
 
 
 
-import sys
 import os
-import shutil
 import json
 import re
 import pandas
@@ -86,7 +86,7 @@ def firewall_running(node_objs):
 					firewall_node_objs.append(node_obj)
 
 	# Print the node table
-	if not len(firewall_node_objs) == 0:
+	if firewall_node_objs:
 		node_table = pandas.DataFrame(data={
 				"IP": [o.ip for o in firewall_node_objs],
 				"Type": [o.type for o in firewall_node_objs],
@@ -133,7 +133,7 @@ def missing_agents(node_objs):
 				if match is not None:
 					unreachable_nodes[match.group(1) + " " + match.group(2)] = match.group(3)
 
-	if not len(unreachable_nodes) == 0:
+	if unreachable_nodes:
 		print("WARNING: Unreachable agents found:")
 
 	unreachable_ips = list()
@@ -182,7 +182,7 @@ def time_sync(node_objs):
 					continue
 
 	# Print the node table
-	if not len(check_time_error_node_objs) == 0:
+	if check_time_error_node_objs:
 		node_table = pandas.DataFrame(data={
 				"IP": [o.ip for o in check_time_error_node_objs],
 				"Type": [o.type for o in check_time_error_node_objs],
@@ -240,7 +240,7 @@ def kmem_presence(node_objs):
 
 
 	# Print the node table
-	if not len(kmem_error_node_objs) == 0:
+	if kmem_error_node_objs:
 		node_table = pandas.DataFrame(data={
 				"IP": [o.ip for o in kmem_error_node_objs],
 				"Type": [o.type for o in kmem_error_node_objs],
@@ -279,7 +279,7 @@ def zk_fsync(node_objs):
 			for each_line in zk_file_handle:
 				each_line = each_line.rstrip("\n")
 
-				match = re.search("fsync-ing the write ahead log in SyncThread:\d+ took\s(\d+)ms", each_line)
+				match = re.search(r"fsync-ing the write ahead log in SyncThread:\d+ took\s(\d+)ms", each_line)
 
 				if match is not None:
 					node_obj.zk_fsync_warning_count += 1
@@ -292,7 +292,7 @@ def zk_fsync(node_objs):
 
 
 	# Print the node table
-	if not len(zk_fsync_node_objs) == 0:
+	if zk_fsync_node_objs:
 		node_table = pandas.DataFrame(data={
 				"IP": [o.ip for o in zk_fsync_node_objs],
 				"ZK fsync Warnings": [o.zk_fsync_warning_count for o in zk_fsync_node_objs],
@@ -340,7 +340,7 @@ def zk_diskspace(node_objs):
 
 
 	# Print the node table
-	if not len(zk_diskspace_node_objs) == 0:
+	if zk_diskspace_node_objs:
 		node_table = pandas.DataFrame(data={
 				"IP": [o.ip for o in zk_diskspace_node_objs],
 				"ZK Disk Space Error": [o.zk_diskspace_error_found for o in zk_diskspace_node_objs],
@@ -387,7 +387,7 @@ def oom_presence(node_objs):
 				each_line = each_line.rstrip("\n")
 
 				# FIXME: Get the killed process not the one that invoked oom-killer
-				match = re.search("Killed process \d+ \(([^\s]+)\)", each_line)
+				match = re.search(r"Killed process \d+ \(([^\s]+)\)", each_line)
 
 				if match is not None:
 					node_obj.oom_invoked_count += 1
@@ -399,7 +399,7 @@ def oom_presence(node_objs):
 
 					
 	# Print the node table
-	if not len(oom_node_objs) == 0:
+	if oom_node_objs:
 		node_table = pandas.DataFrame(data={
 				"IP": [o.ip for o in oom_node_objs],
 				"Type": [o.type for o in oom_node_objs],
@@ -451,7 +451,7 @@ def crdb_ranges(node_objs):
 
 
 	# Print the node table
-	if not len(underrep_ranges_node_objs) == 0:
+	if underrep_ranges_node_objs:
 		node_table = pandas.DataFrame(data={
 				"IP": [o.ip for o in underrep_ranges_node_objs],
 				"Type": [o.type for o in underrep_ranges_node_objs],
@@ -480,10 +480,10 @@ def state_size(node_objs):
 			continue
 
 		if os.path.exists(node_obj.dir + os.sep + "5050-master_state.json"):
-			state_size = os.stat(node_obj.dir + os.sep + "5050-master_state.json").st_size
+			state_size_bytes = os.stat(node_obj.dir + os.sep + "5050-master_state.json").st_size
 
-			if state_size > 5242880:
-				print("Warning: Mesos state.json is larger than 5MB (" + str(round(state_size / 1024 / 1024, 2)) + " MB)")
+			if state_size_bytes > 5242880:
+				print("Warning: Mesos state.json is larger than 5MB (" + str(round(state_size_bytes / 1024 / 1024, 2)) + " MB)")
 
 			break
 
