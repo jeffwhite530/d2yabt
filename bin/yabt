@@ -21,7 +21,7 @@ import subprocess
 
 
 
-def decompress_bundle(bundle_name):
+def extract_dcos_bundle(bundle_name):
 	"""Expand the bundle into a directory unless that directory already exists.
 	"""
 	if os.path.isfile(bundle_name):
@@ -62,7 +62,7 @@ def decompress_bundle(bundle_name):
 	return bundle_dir
 
 
-def decompress_oneliner(bundle_name):
+def extract_oneliner_bundle(bundle_name):
 	"""Expand the one-liner bundle into a directory unless that directory already exists.
 	"""
 
@@ -263,7 +263,7 @@ if __name__ == "__main__":
 	if bundle_name.endswith(".zip") or os.path.exists(bundle_name + os.sep + "summaryReport.txt"):
 		bundle_type = "diag_bundle"
 
-		bundle_dir = decompress_bundle(bundle_name)
+		bundle_dir = extract_dcos_bundle(bundle_name)
 
 		decompress_bundle_files(bundle_dir)
 
@@ -272,7 +272,7 @@ if __name__ == "__main__":
 	elif bundle_name.endswith(".tgz"):
 		bundle_type = "oneliner_bundle"
 
-		bundle_dir = decompress_oneliner(bundle_name)
+		bundle_dir = extract_oneliner_bundle(bundle_name)
 
 	elif os.path.isdir(bundle_name):
 		bundle_dir = bundle_name
