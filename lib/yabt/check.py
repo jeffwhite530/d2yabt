@@ -483,7 +483,7 @@ def state_size(node_objs):
 			state_size = os.stat(node_obj.dir + os.sep + "5050-master_state.json").st_size
 
 			if state_size > 5242880:
-				print("Warning: Mesos state.json is larger than 5MB (" + str(state_size / 1024 / 1024) + " MB)")
+				print("Warning: Mesos state.json is larger than 5MB (" + str(round(state_size / 1024 / 1024, 2)) + " MB)")
 
 			break
 
