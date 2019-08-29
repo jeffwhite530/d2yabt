@@ -101,6 +101,34 @@ def decompress_bundle_files(bundle_dir):
 
 
 
+def format_json(bundle_dir):
+	"""Format the JSON files into a human-readable form.
+	"""
+	print("Formatting JSON files")
+
+	for root, dirs, files in os.walk(bundle_dir):
+		for each_file in files:
+			if not each_file.endswith(".json"):
+				continue
+
+			file_with_path = root + os.sep + each_file
+
+			with open(file_with_path, "r+") as json_file_handle:
+				print(file_with_path)
+
+				try:
+					json_data = json.load(json_file_handle)
+
+					json_file_handle.seek(0)
+
+					json_file_handle.write(json.dumps(json_data, indent=2, sort_keys=True))
+					json_file_handle.write("\n")
+
+				except json.decoder.JSONDecodeError:
+					print("Failed to parse JSON:", file_with_path, file=sys.stderr)
+
+
+
 def get_nodes(bundle_dir, bundle_type):
 	"""Get the list of nodes and create an object for each.
 	"""
@@ -222,6 +250,8 @@ if __name__ == "__main__":
 
 		decompress_bundle_files(bundle_dir)
 
+		format_json(bundle_dir)
+
 	elif bundle_name.endswith(".tgz"):
 		bundle_type = "oneliner_bundle"
 
@@ -245,6 +275,8 @@ if __name__ == "__main__":
 	if bundle_type == "diag_bundle":
 		yabt.check.dcos_version(node_objs)
 		yabt.check.firewall_running(node_objs)
+
+		#TODO: Check if state.json size is >5MB
 
 	yabt.check.missing_agents(node_objs)
 	yabt.check.time_sync(node_objs)
