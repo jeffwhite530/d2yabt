@@ -96,6 +96,9 @@ def decompress_bundle_files(bundle_dir):
 			except EOFError:
 				print("Failed to expand", file_with_path, "EOF reached, incomplete file?")
 
+			except OSError:
+				print("Failed to expand", file_with_path + ", not a gzip file?")
+
 			else:
 				os.remove(file_with_path)
 
@@ -114,8 +117,6 @@ def format_json(bundle_dir):
 			file_with_path = root + os.sep + each_file
 
 			with open(file_with_path, "r+") as json_file_handle:
-				print(file_with_path)
-
 				try:
 					json_data = json.load(json_file_handle)
 
@@ -275,8 +276,7 @@ if __name__ == "__main__":
 	if bundle_type == "diag_bundle":
 		yabt.check.dcos_version(node_objs)
 		yabt.check.firewall_running(node_objs)
-
-		#TODO: Check if state.json size is >5MB
+		yabt.check.state_size(node_objs)
 
 	yabt.check.missing_agents(node_objs)
 	yabt.check.time_sync(node_objs)

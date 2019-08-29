@@ -467,3 +467,23 @@ def crdb_ranges(node_objs):
 
 		print(node_table)
 
+
+
+def state_size(node_objs):
+	"""Check the size of Mesos' state.json and warn if it is large.
+	"""
+
+	print("Checking for large state.json")
+
+	for node_obj in node_objs:
+		if not node_obj.type == "master":
+			continue
+
+		if os.path.exists(node_obj.dir + os.sep + "5050-master_state.json"):
+			state_size = os.stat(node_obj.dir + os.sep + "5050-master_state.json").st_size
+
+			if state_size > 5242880:
+				print("Warning: Mesos state.json is larger than 5MB (" + str(state_size / 1024 / 1024) + " MB)")
+
+			break
+
