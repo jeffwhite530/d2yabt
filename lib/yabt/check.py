@@ -72,7 +72,7 @@ def firewall_running(node_objs):
 
 	for node_obj in sorted(node_objs, key=lambda x: x.type):
 		if not os.path.exists(node_obj.dir + os.sep + "ps_aux_ww_Z.output"):
-			print("Unable to check for running firewall: No ps output available")
+			print("Unable to check for running firewall on", node_obj.ip + ", no ps output available")
 
 			break
 
@@ -485,7 +485,7 @@ def state_size(node_objs):
 			state_size_bytes = os.stat(node_obj.dir + os.sep + "5050-master_state.json").st_size
 
 			if state_size_bytes > 5242880:
-				print("Warning: Mesos state.json is larger than 5MB (" + str(round(state_size_bytes / 1024 / 1024, 2)) + " MB)")
+				print("ALERT: Mesos state.json is larger than 5MB (" + str(round(state_size_bytes / 1024 / 1024, 2)) + " MB)")
 
 			break
 
