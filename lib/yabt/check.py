@@ -15,7 +15,7 @@ import pandas
 
 
 
-pandas.options.display.max_colwidth=200
+pandas.options.display.max_colwidth = 200
 
 
 def dcos_version(node_objs):
@@ -46,7 +46,7 @@ def dcos_version(node_objs):
 	if not len(dcos_versions_set) == 1:
 		print("WARNING: Found non-matching DC/OS versions!")
 
-		node_table = pandas.DataFrame(data = {
+		node_table = pandas.DataFrame(data={
 				"IP": [o.ip for o in node_objs],
 				"Type": [o.type for o in node_objs],
 				"DC/OS Version": [o.dcos_version for o in node_objs]
@@ -87,7 +87,7 @@ def firewall_running(node_objs):
 
 	# Print the node table
 	if not len(firewall_node_objs) == 0:
-		node_table = pandas.DataFrame(data = {
+		node_table = pandas.DataFrame(data={
 				"IP": [o.ip for o in firewall_node_objs],
 				"Type": [o.type for o in firewall_node_objs],
 				"firewalld": [o.firewalld_running for o in firewall_node_objs]
@@ -128,7 +128,7 @@ def missing_agents(node_objs):
 				if re.search("Marking agent.*unreachable", each_line) is None:
 					continue
 
-				match = re.search("^([^\s]+).*(\d+:\d+:\d+\.\d+).*Marking agent.*\((\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})\) unreachable", each_line)
+				match = re.search(r"^([^\s]+).*(\d+:\d+:\d+\.\d+).*Marking agent.*\((\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})\) unreachable", each_line)
 
 				if match is not None:
 					unreachable_nodes[match.group(1) + " " + match.group(2)] = match.group(3)
@@ -183,7 +183,7 @@ def time_sync(node_objs):
 
 	# Print the node table
 	if not len(check_time_error_node_objs) == 0:
-		node_table = pandas.DataFrame(data = {
+		node_table = pandas.DataFrame(data={
 				"IP": [o.ip for o in check_time_error_node_objs],
 				"Type": [o.type for o in check_time_error_node_objs],
 				"check-time Fails": [o.check_time_fail_count for o in check_time_error_node_objs],
@@ -241,7 +241,7 @@ def kmem_presence(node_objs):
 
 	# Print the node table
 	if not len(kmem_error_node_objs) == 0:
-		node_table = pandas.DataFrame(data = {
+		node_table = pandas.DataFrame(data={
 				"IP": [o.ip for o in kmem_error_node_objs],
 				"Type": [o.type for o in kmem_error_node_objs],
 				"kmem SLUB Errors": [o.kmem_slub_error_count for o in kmem_error_node_objs],
@@ -293,7 +293,7 @@ def zk_fsync(node_objs):
 
 	# Print the node table
 	if not len(zk_fsync_node_objs) == 0:
-		node_table = pandas.DataFrame(data = {
+		node_table = pandas.DataFrame(data={
 				"IP": [o.ip for o in zk_fsync_node_objs],
 				"ZK fsync Warnings": [o.zk_fsync_warning_count for o in zk_fsync_node_objs],
 				"ZK Longest fsyncs (ms)": [o.get_longest_zk_fsyncs() for o in zk_fsync_node_objs],
@@ -341,7 +341,7 @@ def zk_diskspace(node_objs):
 
 	# Print the node table
 	if not len(zk_diskspace_node_objs) == 0:
-		node_table = pandas.DataFrame(data = {
+		node_table = pandas.DataFrame(data={
 				"IP": [o.ip for o in zk_diskspace_node_objs],
 				"ZK Disk Space Error": [o.zk_diskspace_error_found for o in zk_diskspace_node_objs],
 			}
@@ -400,7 +400,7 @@ def oom_presence(node_objs):
 					
 	# Print the node table
 	if not len(oom_node_objs) == 0:
-		node_table = pandas.DataFrame(data = {
+		node_table = pandas.DataFrame(data={
 				"IP": [o.ip for o in oom_node_objs],
 				"Type": [o.type for o in oom_node_objs],
 				"oom-killer Invoked": [o.oom_invoked_count for o in oom_node_objs],
@@ -452,7 +452,7 @@ def crdb_ranges(node_objs):
 
 	# Print the node table
 	if not len(underrep_ranges_node_objs) == 0:
-		node_table = pandas.DataFrame(data = {
+		node_table = pandas.DataFrame(data={
 				"IP": [o.ip for o in underrep_ranges_node_objs],
 				"Type": [o.type for o in underrep_ranges_node_objs],
 				"CRDB Underreplicated Ranges": [o.crdb_has_underrep_ranges for o in underrep_ranges_node_objs],
