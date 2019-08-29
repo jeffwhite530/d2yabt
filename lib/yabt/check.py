@@ -35,7 +35,7 @@ def dcos_version(node_objs):
 			dcos_versions_list.append(node_obj.dcos_version)
 
 		except FileNotFoundError:
-			print("WARNING: No dcos-version.json file found for node", node_obj.ip)
+			print("Unable to check DC/OS version on", node_obj.ip + ", no dcos-version.json file found")
 
 			continue
 
@@ -44,7 +44,7 @@ def dcos_version(node_objs):
 
 	# Print the node table
 	if not len(dcos_versions_set) == 1:
-		print("WARNING: Found non-matching DC/OS versions!")
+		print("ALERT: Found non-matching DC/OS versions!")
 
 		node_table = pandas.DataFrame(data={
 				"IP": [o.ip for o in node_objs],
@@ -134,7 +134,7 @@ def missing_agents(node_objs):
 					unreachable_nodes[match.group(1) + " " + match.group(2)] = match.group(3)
 
 	if unreachable_nodes:
-		print("WARNING: Unreachable agents found:")
+		print("ALERT: Unreachable agents found:")
 
 	unreachable_ips = list()
 
@@ -147,7 +147,7 @@ def missing_agents(node_objs):
 
 	for unreachable_ip in sorted(unreachable_ips):
 		if not any(x.ip == unreachable_ip for x in node_objs):
-			print("WARNING: Agent found in Mesos master log but not in the bundle:", unreachable_ip)
+			print("ALERT: Agent found in Mesos master log but not in the bundle:", unreachable_ip)
 
 
 
@@ -224,7 +224,7 @@ def kmem_presence(node_objs):
 			dmesg_file = node_obj.dir + os.sep + "dmesg_t.log"
 
 		else:
-			print("Unable to search for kmem bug, no dmesg file found")
+			print("Unable to search for kmem bug on", node_obj.ip + ", no dmesg file found")
 
 			return
 
@@ -378,7 +378,7 @@ def oom_presence(node_objs):
 			dmesg_file = node_obj.dir + os.sep + "dmesg_t.log"
 
 		else:
-			print("Unable to search for ooms, no dmesg file found")
+			print("Unable to search for ooms on", node_obj.ip + ", no dmesg file found")
 
 			return
 
@@ -436,7 +436,9 @@ def crdb_ranges(node_objs):
 			poststart_log = node_obj.dir + os.sep + "dcos-checks-poststart.service.log"
 
 		else:
-			raise Exception("No dcos-checks-poststart.service log found")
+			print("Unable to check for underreplicated ranges in CRDB on", node_obj.ip + ", no dcos-checks-poststart.service log found")
+
+			continue
 
 		with open(poststart_log, "r") as poststart_file:
 			for each_line in poststart_file:
