@@ -44,7 +44,7 @@ def dcos_version(node_objs):
 
 	# Print the node table
 	if not len(dcos_versions_set) == 1:
-		print("ALERT: Found non-matching DC/OS versions!")
+		print("ALERT: Non-matching DC/OS versions found")
 
 		node_table = pandas.DataFrame(data={
 				"IP": [o.ip for o in node_objs],
@@ -87,6 +87,8 @@ def firewall_running(node_objs):
 
 	# Print the node table
 	if firewall_node_objs:
+		print("ALERT: firewalld found running")
+
 		node_table = pandas.DataFrame(data={
 				"IP": [o.ip for o in firewall_node_objs],
 				"Type": [o.type for o in firewall_node_objs],
@@ -183,6 +185,8 @@ def time_sync(node_objs):
 
 	# Print the node table
 	if check_time_error_node_objs:
+		print("ALERT: check-time failures found:")
+
 		node_table = pandas.DataFrame(data={
 				"IP": [o.ip for o in check_time_error_node_objs],
 				"Type": [o.type for o in check_time_error_node_objs],
@@ -241,6 +245,8 @@ def kmem_presence(node_objs):
 
 	# Print the node table
 	if kmem_error_node_objs:
+		print("ALERT: kmem SLUB errors found:")
+
 		node_table = pandas.DataFrame(data={
 				"IP": [o.ip for o in kmem_error_node_objs],
 				"Type": [o.type for o in kmem_error_node_objs],
@@ -284,7 +290,6 @@ def zk_fsync(node_objs):
 				if match is not None:
 					node_obj.zk_fsync_warning_count += 1
 
-					#FIXME: Get the actual value
 					node_obj.add_zk_fsync(match.group(1))
 
 					if node_obj not in zk_fsync_node_objs:
@@ -293,6 +298,8 @@ def zk_fsync(node_objs):
 
 	# Print the node table
 	if zk_fsync_node_objs:
+		print("ALERT: ZooKeeper slow fsync found:")
+
 		node_table = pandas.DataFrame(data={
 				"IP": [o.ip for o in zk_fsync_node_objs],
 				"ZK fsync Warnings": [o.zk_fsync_warning_count for o in zk_fsync_node_objs],
@@ -341,6 +348,8 @@ def zk_diskspace(node_objs):
 
 	# Print the node table
 	if zk_diskspace_node_objs:
+		print("ALERT: ZooKeeper disk space error found:")
+
 		node_table = pandas.DataFrame(data={
 				"IP": [o.ip for o in zk_diskspace_node_objs],
 				"ZK Disk Space Error": [o.zk_diskspace_error_found for o in zk_diskspace_node_objs],
@@ -348,6 +357,59 @@ def zk_diskspace(node_objs):
 		)
 
 		node_table.sort_values("ZK Disk Space Error", inplace=True, ascending=False)
+
+		node_table.reset_index(inplace=True, drop=True)
+
+		node_table.index += 1
+
+		print(node_table)
+
+
+
+def zk_connection_exception(node_objs):
+	"""Check for connection exceptions in ZooKeeper.
+	"""
+	print("Checking for connection exceptions in ZooKeeper")
+
+	zk_connection_exceptions = dict()
+
+	for node_obj in node_objs:
+		if not node_obj.type == "master":
+			continue
+
+		if os.path.exists(node_obj.dir + os.sep + "dcos-exhibitor.service"):
+			exhibitor_log = node_obj.dir + os.sep + "dcos-exhibitor.service"
+
+		elif os.path.exists(node_obj.dir + os.sep + "dcos-exhibitor.service.log"):
+			exhibitor_log = node_obj.dir + os.sep + "dcos-exhibitor.service.log"
+
+		with open(exhibitor_log, "r") as zk_file_handle:
+			for each_line in zk_file_handle:
+				each_line = each_line.rstrip("\n")
+
+				match = re.search(r"Unexpected exception, tries=3, connecting to /(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}):2888", each_line)
+
+				if match is not None:
+					exception_connection = node_obj.ip + " --> " + match.group(1)
+
+					try:
+						zk_connection_exceptions[exception_connection] += 1
+
+					except KeyError:
+						zk_connection_exceptions[exception_connection] = 1
+
+
+	# Print the node table
+	if zk_connection_exceptions:
+		print("ALERT: ZooKeeper connection exceptions found:")
+
+		node_table = pandas.DataFrame(data={
+				"Connection": list(zk_connection_exceptions.keys()),
+				"Count": [zk_connection_exceptions[connection] for connection in zk_connection_exceptions.keys()]
+			}
+		)
+
+		node_table.sort_values("Count", inplace=True, ascending=False)
 
 		node_table.reset_index(inplace=True, drop=True)
 
@@ -386,7 +448,6 @@ def oom_presence(node_objs):
 			for each_line in dmesg_file_handle:
 				each_line = each_line.rstrip("\n")
 
-				# FIXME: Get the killed process not the one that invoked oom-killer
 				match = re.search(r"Killed process \d+ \(([^\s]+)\)", each_line)
 
 				if match is not None:
@@ -400,6 +461,8 @@ def oom_presence(node_objs):
 					
 	# Print the node table
 	if oom_node_objs:
+		print("ALERT: Instances of oom-killer found")
+
 		node_table = pandas.DataFrame(data={
 				"IP": [o.ip for o in oom_node_objs],
 				"Type": [o.type for o in oom_node_objs],
@@ -454,6 +517,8 @@ def crdb_ranges(node_objs):
 
 	# Print the node table
 	if underrep_ranges_node_objs:
+		print("ALERT: CRDB under-replicated ranges found")
+
 		node_table = pandas.DataFrame(data={
 				"IP": [o.ip for o in underrep_ranges_node_objs],
 				"Type": [o.type for o in underrep_ranges_node_objs],

@@ -299,11 +299,9 @@ if __name__ == "__main__":
 	yabt.check.kmem_presence(node_objs)
 	yabt.check.zk_fsync(node_objs)
 	yabt.check.zk_diskspace(node_objs)
+	yabt.check.zk_connection_exception(node_objs)
 	yabt.check.oom_presence(node_objs)
 	yabt.check.crdb_ranges(node_objs)
-
-	# TODO: check_zk()
-	# Unexpected exception, tries=3, connecting to /10.121.48.65:2888
 
 	# TODO: check_mesos_master()
 
