@@ -6,6 +6,7 @@
 
 
 
+import yabt
 import sys
 import os
 import zipfile
@@ -137,8 +138,13 @@ def get_nodes(bundle_dir, bundle_type):
 	if len(node_objs) == 0:
 		raise(Exception("Failed to find any nodes in the bundle directory"))
 
+	return node_objs
 
-	# Print the node table
+
+
+def print_nodes(node_objs):
+	"""Prints a table of nodes.
+	"""
 	node_table = pandas.DataFrame(data = {
 			"IP": [o.ip for o in node_objs],
 			"Type": [o.type for o in node_objs],
@@ -152,7 +158,4 @@ def get_nodes(bundle_dir, bundle_type):
 	node_table.index += 1
 
 	print(node_table)
-
-
-	return node_objs
 

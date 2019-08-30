@@ -142,6 +142,8 @@ if __name__ == "__main__":
 	# Create the node objects list
 	node_objs = yabt.dcos.get_nodes(bundle_dir, bundle_type)
 
+	yabt.dcos.print_nodes(node_objs)
+
 
 	# Health checks
 	if bundle_type == "diag_bundle":
