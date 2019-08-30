@@ -16,6 +16,8 @@ import pandas
 
 
 pandas.options.display.max_colwidth = 200
+ansi_red_fg = "\033[31m"
+ansi_end_color = "\033[0m"
 
 
 def dcos_version(node_objs):
@@ -44,7 +46,7 @@ def dcos_version(node_objs):
 
 	# Print the node table
 	if not len(dcos_versions_set) == 1:
-		print("ALERT: Non-matching DC/OS versions found")
+		print(ansi_red_fg + "ALERT: Non-matching DC/OS versions found" + ansi_end_color)
 
 		node_table = pandas.DataFrame(data={
 				"IP": [o.ip for o in node_objs],
@@ -87,7 +89,7 @@ def firewall_running(node_objs):
 
 	# Print the node table
 	if firewall_node_objs:
-		print("ALERT: firewalld found running")
+		print(ansi_red_fg + "ALERT: firewalld found running" + ansi_end_color)
 
 		node_table = pandas.DataFrame(data={
 				"IP": [o.ip for o in firewall_node_objs],
@@ -136,7 +138,7 @@ def missing_agents(node_objs):
 					unreachable_nodes[match.group(1) + " " + match.group(2)] = match.group(3)
 
 	if unreachable_nodes:
-		print("ALERT: Unreachable agents found:")
+		print(ansi_red_fg + "ALERT: Unreachable agents found:" + ansi_end_color)
 
 	unreachable_ips = list()
 
@@ -149,7 +151,7 @@ def missing_agents(node_objs):
 
 	for unreachable_ip in sorted(unreachable_ips):
 		if not any(x.ip == unreachable_ip for x in node_objs):
-			print("ALERT: Agent found in Mesos master log but not in the bundle:", unreachable_ip)
+			print(ansi_red_fg + "ALERT: Agent found in Mesos master log but not in the bundle:", unreachable_ip + ansi_end_color)
 
 
 
@@ -185,7 +187,7 @@ def time_sync(node_objs):
 
 	# Print the node table
 	if check_time_error_node_objs:
-		print("ALERT: check-time failures found:")
+		print(ansi_red_fg + "ALERT: check-time failures found:" + ansi_end_color)
 
 		node_table = pandas.DataFrame(data={
 				"IP": [o.ip for o in check_time_error_node_objs],
@@ -245,7 +247,7 @@ def kmem_presence(node_objs):
 
 	# Print the node table
 	if kmem_error_node_objs:
-		print("ALERT: kmem SLUB errors found:")
+		print(ansi_red_fg + "ALERT: kmem SLUB errors found:" + ansi_end_color)
 
 		node_table = pandas.DataFrame(data={
 				"IP": [o.ip for o in kmem_error_node_objs],
@@ -298,7 +300,7 @@ def zk_fsync(node_objs):
 
 	# Print the node table
 	if zk_fsync_node_objs:
-		print("ALERT: ZooKeeper slow fsync found:")
+		print(ansi_red_fg + "ALERT: ZooKeeper slow fsync found:" + ansi_end_color)
 
 		node_table = pandas.DataFrame(data={
 				"IP": [o.ip for o in zk_fsync_node_objs],
@@ -348,7 +350,7 @@ def zk_diskspace(node_objs):
 
 	# Print the node table
 	if zk_diskspace_node_objs:
-		print("ALERT: ZooKeeper disk space error found:")
+		print(ansi_red_fg + "ALERT: ZooKeeper disk space error found:" + ansi_end_color)
 
 		node_table = pandas.DataFrame(data={
 				"IP": [o.ip for o in zk_diskspace_node_objs],
@@ -401,7 +403,7 @@ def zk_connection_exception(node_objs):
 
 	# Print the node table
 	if zk_connection_exceptions:
-		print("ALERT: ZooKeeper connection exceptions found:")
+		print(ansi_red_fg + "ALERT: ZooKeeper connection exceptions found:" + ansi_end_color)
 
 		node_table = pandas.DataFrame(data={
 				"Connection": list(zk_connection_exceptions.keys()),
@@ -461,7 +463,7 @@ def oom_presence(node_objs):
 					
 	# Print the node table
 	if oom_node_objs:
-		print("ALERT: Instances of oom-killer found")
+		print(ansi_red_fg + "ALERT: Instances of oom-killer found" + ansi_end_color)
 
 		node_table = pandas.DataFrame(data={
 				"IP": [o.ip for o in oom_node_objs],
@@ -517,7 +519,7 @@ def crdb_ranges(node_objs):
 
 	# Print the node table
 	if underrep_ranges_node_objs:
-		print("ALERT: CRDB under-replicated ranges found")
+		print(ansi_red_fg + "ALERT: CRDB under-replicated ranges found" + ansi_end_color)
 
 		node_table = pandas.DataFrame(data={
 				"IP": [o.ip for o in underrep_ranges_node_objs],
@@ -550,7 +552,7 @@ def state_size(node_objs):
 			state_size_bytes = os.stat(node_obj.dir + os.sep + "5050-master_state.json").st_size
 
 			if state_size_bytes > 5242880:
-				print("ALERT: Mesos state.json is larger than 5MB (" + str(round(state_size_bytes / 1024 / 1024, 2)) + " MB)")
+				print(ansi_red_fg + "ALERT: Mesos state.json is larger than 5MB (" + str(round(state_size_bytes / 1024 / 1024, 2)) + " MB)" + ansi_end_color)
 
 			break
 
