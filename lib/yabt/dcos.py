@@ -22,7 +22,9 @@ def extract_bundle(bundle_name):
 	"""Expand the bundle into a directory unless that directory already exists.
 	"""
 	if os.path.isfile(bundle_name):
-		bundle_dir = bundle_name[:-4]
+		bundle_name_base = os.path.basename(bundle_name)
+
+		bundle_dir = bundle_name_base[:-4]
 
 		if os.path.exists(bundle_dir):
 			print("Bundle has already been extracted, using existing directory")
@@ -53,6 +55,11 @@ def extract_bundle(bundle_name):
 
 				# Note that we're not checking if 7zip was successful because it will exit non-zero even if it was able to partially extract the zip.
 
+		if not bundle_name == bundle_name_base:
+			os.rename(bundle_name, bundle_name_base)
+
+			print("Moved", bundle_name_base, "to the current working directory")
+
 	elif os.path.isdir(bundle_name):
 		bundle_dir = bundle_name
 
@@ -64,7 +71,9 @@ def extract_oneliner(bundle_name):
 	"""
 
 	if os.path.isfile(bundle_name):
-		bundle_dir = bundle_name[:-4]
+		bundle_name_base = os.path.basename(bundle_name)
+
+		bundle_dir = bundle_name_base[:-4]
 
 		if os.path.exists(bundle_dir):
 			print("Bundle has already been extracted, using existing directory")
@@ -79,6 +88,11 @@ def extract_oneliner(bundle_name):
 			tarfile_obj.extractall(bundle_dir)
 
 			tarfile_obj.close()
+
+		if not bundle_name == bundle_name_base:
+			os.rename(bundle_name, bundle_name_base)
+
+			print("Moved", bundle_name_base, "to the current working directory")
 
 	elif os.path.isdir(bundle_name):
 		bundle_dir = bundle_name
