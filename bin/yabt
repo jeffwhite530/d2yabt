@@ -14,6 +14,12 @@ import gzip
 import shutil
 import json
 import re
+import signal
+
+
+
+def trap_sigint(signal, frame):
+	sys.exit(0)
 
 
 
@@ -94,6 +100,10 @@ if __name__ == "__main__":
 	yabt_args = parser.parse_args()
 
 
+	# Trap CTRL+C (SIGINT)
+	signal.signal(signal.SIGINT, trap_sigint)
+
+
 	# Verify we have a bundle arg
 	if not len(yabt_args.bundle_name) == 1:
 		print("Invalid number of bundle names passed, shell quoting problem?", file=sys.stderr)
@@ -161,4 +171,13 @@ if __name__ == "__main__":
 	yabt.check.crdb_ranges(node_objs)
 
 	# TODO: check_mesos_master()
+	# TODO: List each Mesos leader change
+	# TODO: List each ZK leader change
+	# TODO: List each Marathon leader change
+	# TODO: Check for inactive frameworks
+	# TODO: Check for unreachable tasks
+	# TODO: Check for nodes missing the Docker daemon running
+	# TODO: Check for CRDB time sync events
+	# TODO: Check for private registry certificate errors
+	# TODO: Check for overlay master module in RECOVERING state events
 
