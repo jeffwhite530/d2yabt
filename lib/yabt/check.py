@@ -112,9 +112,9 @@ def firewall_running(node_objs):
 def unreachable_agents_mesos_log(node_objs):
 	"""Check for agents which are unreachable according to the Mesos master and for agent which are not in the bundle.
 	"""
-	print("Checking for missing agents in Mesos master log")
+	print("Checking for unreachable agents in the Mesos master log")
 
-	unreachable_nodes = dict()
+	unreachable_nodes = list()
 
 	for node_obj in node_objs:
 		if not node_obj.type == "master":
@@ -130,29 +130,54 @@ def unreachable_agents_mesos_log(node_objs):
 			for each_line in mesos_master_log:
 				each_line = each_line.rstrip("\n")
 
-				if re.search("Marking agent.*unreachable", each_line) is None:
-					continue
-
-				match = re.search(r"^([^\s]+).*(\d+:\d+:\d+\.\d+).*Marking agent.*\((\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})\) unreachable", each_line)
+				match = re.search(r"(\d+-\d+-\d+).*(\d+:\d+:\d+\.\d+).*Marking agent.*\((\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})\) unreachable", each_line)
 
 				if match is not None:
-					unreachable_nodes[match.group(1) + " " + match.group(2)] = match.group(3)
+					date_string = match.group(1)
+					time_string = match.group(2)
+					unreachable_ip = match.group(3)
 
+					unreachable_datetime = datetime.datetime.strptime(date_string + " " + time_string, "%Y-%m-%d %H:%M:%S.%f")
+
+					unreachable_nodes.append((unreachable_datetime, unreachable_ip))
+
+	# Print the node table
 	if unreachable_nodes:
-		print(ansi_red_fg + "ALERT: Unreachable agents found in Mesos master log" + ansi_end_color)
+		print(ansi_red_fg + "ALERT: Unreachable agents found in the Mesos master log" + ansi_end_color)
 
-	unreachable_ips = list()
+		unreachable_nodes.sort(key=lambda tup: tup[0])
 
-	for timestamp, ip in unreachable_nodes.items():
-		print("\t", timestamp + ":", ip)
+		node_table = pandas.DataFrame(data={
+				"Time": [tup[0] for tup in unreachable_nodes],
+				"Agent": [tup[1] for tup in unreachable_nodes],
+			}
+		)
 
-		unreachable_ips.append(ip)
+		node_table.index += 1
 
-	unreachable_ips = set(unreachable_ips)
+		print(node_table)
+
+	# Find agents that are mentioned in the Mesos master log but are not in the bundle
+	unreachable_ips = set(tup[1] for tup in unreachable_nodes)
+
+	missing_nodes_from_bundle = list()
 
 	for unreachable_ip in sorted(unreachable_ips):
 		if not any(x.ip == unreachable_ip for x in node_objs):
-			print(ansi_red_fg + "ALERT: Agent found in Mesos master log but not in the bundle:", unreachable_ip + ansi_end_color)
+			missing_nodes_from_bundle.append(unreachable_ip)
+
+	# Print the node table
+	if missing_nodes_from_bundle:
+		print(ansi_red_fg + "ALERT: Agents found in Mesos master log but not in the bundle" + ansi_end_color)
+
+		node_table = pandas.DataFrame(data={
+				"Agent": missing_nodes_from_bundle,
+			}
+		)
+
+		node_table.index += 1
+
+		print(node_table)
 
 
 
@@ -188,7 +213,7 @@ def time_sync(node_objs):
 
 	# Print the node table
 	if check_time_error_node_objs:
-		print(ansi_red_fg + "ALERT: check-time failures found:" + ansi_end_color)
+		print(ansi_red_fg + "ALERT: check-time failures found" + ansi_end_color)
 
 		node_table = pandas.DataFrame(data={
 				"IP": [o.ip for o in check_time_error_node_objs],
