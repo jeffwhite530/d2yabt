@@ -23,12 +23,12 @@ def trap_sigint(signal, frame):
 
 
 
-def decompress_bundle_files(bundle_dir):
-	"""Expand compressed files within the bundle.
+def decompress_gzip_files(start_dir):
+	"""Walk a directory tree and decompress all gzip files found.
 	"""
 	print("Expanding bundle files")
 
-	for root, dirs, files in os.walk(bundle_dir):
+	for root, dirs, files in os.walk(start_dir):
 		for each_file in files:
 			if not each_file.endswith(".gz"):
 				continue
@@ -130,7 +130,7 @@ if __name__ == "__main__":
 
 		bundle_dir = yabt.dcos.extract_bundle(bundle_name)
 
-		decompress_bundle_files(bundle_dir)
+		decompress_gzip_files(bundle_dir)
 
 		format_json(bundle_dir)
 
