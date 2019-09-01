@@ -8,6 +8,7 @@
 
 
 
+import sys
 import os
 import json
 import re
@@ -702,6 +703,11 @@ def marathon_leader_changes(node_objs):
 		elif os.path.exists(node_obj.dir + os.sep + "dcos-marathon.service.log"):
 			marathon_log = node_obj.dir + os.sep + "dcos-marathon.service.log"
 
+		else:
+			print("Failed to find Marathon log on", node_obj.ip, file=sys.stderr)
+
+			continue
+
 		with open(marathon_log, "r") as marathon_log_handle:
 			for each_line in marathon_log_handle:
 				each_line = each_line.rstrip("\n")
@@ -738,7 +744,7 @@ def marathon_leader_changes(node_objs):
 def unreachable_agents_mesos_state(node_objs):
 	"""Check for unreachable agents in Mesos
 	"""
-	print("Checking for unreachable agents (from Mesos state)")
+	print("Checking for unreachable agents in the Mesos state")
 
 	unreachable_agents = list()
 
