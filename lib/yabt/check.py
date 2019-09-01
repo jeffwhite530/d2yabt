@@ -274,7 +274,7 @@ def kmem_presence(node_objs):
 
 	# Print the node table
 	if kmem_error_node_objs:
-		print(ansi_red_fg + "ALERT: kmem SLUB errors found:" + ansi_end_color)
+		print(ansi_red_fg + "ALERT: kmem SLUB errors found" + ansi_end_color)
 
 		node_table = pandas.DataFrame(data={
 				"IP": [o.ip for o in kmem_error_node_objs],
@@ -327,7 +327,7 @@ def zk_fsync(node_objs):
 
 	# Print the node table
 	if zk_fsync_node_objs:
-		print(ansi_red_fg + "ALERT: ZooKeeper slow fsync found:" + ansi_end_color)
+		print(ansi_red_fg + "ALERT: ZooKeeper slow fsync found" + ansi_end_color)
 
 		node_table = pandas.DataFrame(data={
 				"IP": [o.ip for o in zk_fsync_node_objs],
@@ -377,7 +377,7 @@ def zk_diskspace(node_objs):
 
 	# Print the node table
 	if zk_diskspace_node_objs:
-		print(ansi_red_fg + "ALERT: ZooKeeper disk space error found:" + ansi_end_color)
+		print(ansi_red_fg + "ALERT: ZooKeeper disk space error found" + ansi_end_color)
 
 		node_table = pandas.DataFrame(data={
 				"IP": [o.ip for o in zk_diskspace_node_objs],
@@ -430,7 +430,7 @@ def zk_connection_exception(node_objs):
 
 	# Print the node table
 	if zk_connection_exceptions:
-		print(ansi_red_fg + "ALERT: ZooKeeper connection exceptions found:" + ansi_end_color)
+		print(ansi_red_fg + "ALERT: ZooKeeper connection exceptions found" + ansi_end_color)
 
 		node_table = pandas.DataFrame(data={
 				"Connection": list(zk_connection_exceptions.keys()),
