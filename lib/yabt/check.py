@@ -109,10 +109,10 @@ def firewall_running(node_objs):
 
 
 
-def missing_agents(node_objs):
+def unreachable_agents_mesos_log(node_objs):
 	"""Check for agents which are unreachable according to the Mesos master and for agent which are not in the bundle.
 	"""
-	print("Checking for missing agents")
+	print("Checking for missing agents in Mesos master log")
 
 	unreachable_nodes = dict()
 
@@ -139,7 +139,7 @@ def missing_agents(node_objs):
 					unreachable_nodes[match.group(1) + " " + match.group(2)] = match.group(3)
 
 	if unreachable_nodes:
-		print(ansi_red_fg + "ALERT: Unreachable agents found:" + ansi_end_color)
+		print(ansi_red_fg + "ALERT: Unreachable agents found in Mesos master log" + ansi_end_color)
 
 	unreachable_ips = list()
 
@@ -701,6 +701,60 @@ def marathon_leader_changes(node_objs):
 		node_table = pandas.DataFrame(data={
 				"Time": [tup[0] for tup in leader_changes],
 				"New Leader": [tup[1] for tup in leader_changes],
+			}
+		)
+
+		node_table.index += 1
+
+		print(node_table)
+
+
+
+def unreachable_agents_mesos_state(node_objs):
+	"""Check for unreachable agents in Mesos
+	"""
+	print("Checking for unreachable agents (from Mesos state)")
+
+	unreachable_agents = list()
+
+	for node_obj in node_objs:
+		if not node_obj.type == "master":
+			continue
+
+		if not os.path.exists(node_obj.dir + os.sep + "5050-registrar_1__registry.json"):
+			continue
+
+		with open(node_obj.dir + os.sep + "5050-registrar_1__registry.json", "r") as json_file_handle:
+			try:
+				json_data = json.load(json_file_handle)
+
+			except json.decoder.JSONDecodeError:
+				print("Unable to check for unreachable agents, failed to parse 5050-registrar_1__registry.json", file=sys.stderr)
+
+				break
+
+		if "unreachable" in json_data:
+			for entry in json_data["unreachable"]["slaves"]:
+				slave_id = entry["id"]["value"]
+
+				# Convert nanoseconds since epoch to a datetime object with microsecond accuracy
+				epoch_nanoseconds = entry["timestamp"]["nanoseconds"]
+				microseconds = int(str(int(epoch_nanoseconds / 1000 % 1000000)).zfill(6))
+
+				datetime_object = datetime.datetime.fromtimestamp(epoch_nanoseconds // 1000000000)
+				datetime_object += datetime.timedelta(microseconds=microseconds)
+
+				unreachable_agents.append((datetime_object, slave_id))
+
+	# Print the node table
+	if unreachable_agents:
+		print(ansi_red_fg + "ALERT: Unreachable agents found in Mesos state" + ansi_end_color)
+
+		unreachable_agents.sort(key=lambda tup: tup[0])
+
+		node_table = pandas.DataFrame(data={
+				"Time": [tup[0] for tup in unreachable_agents],
+				"Agent": [tup[1] for tup in unreachable_agents],
 			}
 		)
 

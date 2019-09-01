@@ -74,7 +74,7 @@ def format_json(bundle_dir):
 					json_file_handle.write(json.dumps(json_data, indent=2, sort_keys=True))
 					json_file_handle.write("\n")
 
-				except json.decoder.JSONDecodeError:
+				except (json.decoder.JSONDecodeError, UnicodeDecodeError):
 					print("Failed to parse JSON:", file_with_path, file=sys.stderr)
 
 
@@ -160,11 +160,12 @@ if __name__ == "__main__":
 		yabt.check.dcos_version(node_objs)
 		yabt.check.firewall_running(node_objs)
 		yabt.check.state_size(node_objs)
+		yabt.check.unreachable_agents_mesos_state(node_objs)
 
+	yabt.check.unreachable_agents_mesos_log(node_objs)
 	yabt.check.mesos_leader_changes(node_objs)
 	yabt.check.zk_leader_changes(node_objs)
 	yabt.check.marathon_leader_changes(node_objs)
-	yabt.check.missing_agents(node_objs)
 	yabt.check.time_sync(node_objs)
 	yabt.check.kmem_presence(node_objs)
 	yabt.check.zk_fsync(node_objs)
@@ -175,7 +176,6 @@ if __name__ == "__main__":
 
 	# TODO: check_mesos_master()
 	# TODO: Check for inactive frameworks
-	# TODO: Check for unreachable tasks
 	# TODO: Check for nodes missing the Docker daemon running
 	# TODO: Check for CRDB time sync events
 	# TODO: Check for private registry certificate errors
