@@ -12,6 +12,7 @@ import os
 import json
 import re
 import pandas
+import datetime
 
 
 
@@ -555,4 +556,57 @@ def state_size(node_objs):
 				print(ansi_red_fg + "ALERT: Mesos state.json is larger than 5MB (" + str(round(state_size_bytes / 1024 / 1024, 2)) + " MB)" + ansi_end_color)
 
 			break
+
+
+def mesos_leader_changes(node_objs):
+	"""Search for Mesos leader changes.
+	"""
+
+	print("Checking for Mesos leader changes")
+
+	leader_changes = list()
+
+	for node_obj in node_objs:
+		if not node_obj.type == "master":
+			continue
+
+		if os.path.exists(node_obj.dir + os.sep + "dcos-mesos-master.service"):
+			mesos_log = node_obj.dir + os.sep + "dcos-mesos-master.service"
+
+		elif os.path.exists(node_obj.dir + os.sep + "dcos-mesos-master.service.log"):
+			mesos_log = node_obj.dir + os.sep + "dcos-mesos-master.service.log"
+
+		with open(mesos_log, "r") as mesos_master_log:
+			for each_line in mesos_master_log:
+				each_line = each_line.rstrip("\n")
+
+				match = re.search(r"(\d+-\d+-\d+) (\d+:\d+:\d+\.\d+) .* A new leading master \(UPID=master@(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}):5050\) is detected", each_line)
+
+				if match is not None:
+					date_string = match.group(1)
+					time_string = match.group(2)
+					leader_ip = match.group(3)
+
+					change_datetime = datetime.datetime.strptime(date_string + " " + time_string, "%Y-%m-%d %H:%M:%S.%f")
+
+					leader_changes.append((change_datetime, leader_ip))
+
+	# Print the node table
+	if leader_changes:
+		print(ansi_red_fg + "ALERT: Mesos leader changes found" + ansi_end_color)
+
+		leader_changes.sort(key=lambda tup: tup[0])
+
+		node_table = pandas.DataFrame(data={
+				"Time": [tup[0] for tup in leader_changes],
+				"New Leader": [tup[1] for tup in leader_changes],
+			}
+		)
+
+		node_table.index += 1
+
+		print(node_table)
+
+
+
 

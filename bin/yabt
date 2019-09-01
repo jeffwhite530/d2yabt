@@ -161,6 +161,7 @@ if __name__ == "__main__":
 		yabt.check.firewall_running(node_objs)
 		yabt.check.state_size(node_objs)
 
+	yabt.check.mesos_leader_changes(node_objs)
 	yabt.check.missing_agents(node_objs)
 	yabt.check.time_sync(node_objs)
 	yabt.check.kmem_presence(node_objs)
