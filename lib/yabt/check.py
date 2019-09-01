@@ -657,3 +657,54 @@ def zk_leader_changes(node_objs):
 
 		print(node_table)
 
+
+
+def marathon_leader_changes(node_objs):
+	"""Search for Marathon leader changes.
+	"""
+
+	print("Checking for Marathon leader changes")
+
+	leader_changes = list()
+
+	for node_obj in node_objs:
+		if not node_obj.type == "master":
+			continue
+
+		if os.path.exists(node_obj.dir + os.sep + "dcos-marathon.service"):
+			marathon_log = node_obj.dir + os.sep + "dcos-marathon.service"
+
+		elif os.path.exists(node_obj.dir + os.sep + "dcos-marathon.service.log"):
+			marathon_log = node_obj.dir + os.sep + "dcos-marathon.service.log"
+
+		with open(marathon_log, "r") as marathon_log_handle:
+			for each_line in marathon_log_handle:
+				each_line = each_line.rstrip("\n")
+
+				match = re.search(r"(\d+-\d+-\d+) (\d+:\d+:\d+\.\d+) .* Leader won: (\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}):8443", each_line)
+
+				if match is not None:
+					date_string = match.group(1)
+					time_string = match.group(2)
+					leader_ip = match.group(3)
+
+					change_datetime = datetime.datetime.strptime(date_string + " " + time_string, "%Y-%m-%d %H:%M:%S.%f")
+
+					leader_changes.append((change_datetime, leader_ip))
+
+	# Print the node table
+	if leader_changes:
+		print(ansi_red_fg + "ALERT: Marathon leader changes found" + ansi_end_color)
+
+		leader_changes.sort(key=lambda tup: tup[0])
+
+		node_table = pandas.DataFrame(data={
+				"Time": [tup[0] for tup in leader_changes],
+				"New Leader": [tup[1] for tup in leader_changes],
+			}
+		)
+
+		node_table.index += 1
+
+		print(node_table)
+

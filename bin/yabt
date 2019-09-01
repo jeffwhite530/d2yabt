@@ -163,6 +163,7 @@ if __name__ == "__main__":
 
 	yabt.check.mesos_leader_changes(node_objs)
 	yabt.check.zk_leader_changes(node_objs)
+	yabt.check.marathon_leader_changes(node_objs)
 	yabt.check.missing_agents(node_objs)
 	yabt.check.time_sync(node_objs)
 	yabt.check.kmem_presence(node_objs)
@@ -173,7 +174,6 @@ if __name__ == "__main__":
 	yabt.check.crdb_ranges(node_objs)
 
 	# TODO: check_mesos_master()
-	# TODO: List each Marathon leader change
 	# TODO: Check for inactive frameworks
 	# TODO: Check for unreachable tasks
 	# TODO: Check for nodes missing the Docker daemon running
