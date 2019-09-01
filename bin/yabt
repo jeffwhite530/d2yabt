@@ -92,10 +92,7 @@ if __name__ == "__main__":
 							help="The bundle file or directory")
 
 	# TODO: Add option to only look at a specific node
-	# TODO: Add option to do checks and only extract unless given this or another option
-	# TODO: Add option to list what checks will be done
-	# TODO: Add option to do "deep inspect" checks (e.g. show when ooms happened and what processes were killed)
-	# TODO: Add option to list what "deep inspect" checks are available
+	# TODO: Add option to skip checks and only extract unless given this or another option
 
 	yabt_args = parser.parse_args()
 
@@ -160,6 +157,7 @@ if __name__ == "__main__":
 		yabt.check.dcos_version(node_objs)
 		yabt.check.firewall_running(node_objs)
 		yabt.check.state_size(node_objs)
+		yabt.check.inactive_frameworks(node_objs)
 		yabt.check.unreachable_agents_mesos_state(node_objs)
 
 	yabt.check.unreachable_agents_mesos_log(node_objs)

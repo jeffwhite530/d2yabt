@@ -771,6 +771,8 @@ def unreachable_agents_mesos_state(node_objs):
 
 				unreachable_agents.append((datetime_object, slave_id))
 
+		break
+
 	# Print the node table
 	if unreachable_agents:
 		print(ansi_red_fg + "ALERT: Unreachable agents found in Mesos state" + ansi_end_color)
@@ -780,6 +782,54 @@ def unreachable_agents_mesos_state(node_objs):
 		node_table = pandas.DataFrame(data={
 				"Time": [tup[0] for tup in unreachable_agents],
 				"Agent": [tup[1] for tup in unreachable_agents],
+			}
+		)
+
+		node_table.index += 1
+
+		print(node_table)
+
+
+
+def inactive_frameworks(node_objs):
+	"""Check for and list any inactive frameworks.
+	"""
+
+	print("Checking for inactive frameworks")
+
+	inactive_frameworks = list()
+
+	for node_obj in node_objs:
+		if not node_obj.type == "master":
+			continue
+
+		if not os.path.exists(node_obj.dir + os.sep + "5050-master_state.json"):
+			continue
+
+		with open(node_obj.dir + os.sep + "5050-master_state.json", "r") as json_file_handle:
+			try:
+				json_data = json.load(json_file_handle)
+
+			except json.decoder.JSONDecodeError:
+				print("Unable to check for inactive frameworks, failed to parse 5050-master_state.json", file=sys.stderr)
+
+				break
+
+		for framework in json_data["frameworks"]:
+			if framework["active"] is False:
+				inactive_frameworks.append((framework["name"], framework["id"]))
+
+		break
+
+	# Print the node table
+	if inactive_frameworks:
+		print(ansi_red_fg + "ALERT: Found inactive frameworks" + ansi_end_color)
+
+		inactive_frameworks.sort(key=lambda tup: tup[0])
+
+		node_table = pandas.DataFrame(data={
+				"Name": [tup[0] for tup in inactive_frameworks],
+				"ID": [tup[1] for tup in inactive_frameworks],
 			}
 		)
 
