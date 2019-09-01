@@ -609,4 +609,51 @@ def mesos_leader_changes(node_objs):
 
 
 
+def zk_leader_changes(node_objs):
+	"""Search for ZooKeeper leader changes.
+	"""
+
+	print("Checking for ZooKeeper leader changes")
+
+	leader_changes = list()
+
+	for node_obj in node_objs:
+		if not node_obj.type == "master":
+			continue
+
+		if os.path.exists(node_obj.dir + os.sep + "dcos-exhibitor.service"):
+			exhibitor_log = node_obj.dir + os.sep + "dcos-exhibitor.service"
+
+		elif os.path.exists(node_obj.dir + os.sep + "dcos-exhibitor.service.log"):
+			exhibitor_log = node_obj.dir + os.sep + "dcos-exhibitor.service.log"
+
+		with open(exhibitor_log, "r") as exhibitor_log_handle:
+			for each_line in exhibitor_log_handle:
+				each_line = each_line.rstrip("\n")
+
+				match = re.search(r"(\d+-\d+-\d+) (\d+:\d+:\d+\.\d+) .* LEADING$", each_line)
+
+				if match is not None:
+					date_string = match.group(1)
+					time_string = match.group(2)
+
+					change_datetime = datetime.datetime.strptime(date_string + " " + time_string, "%Y-%m-%d %H:%M:%S.%f")
+
+					leader_changes.append((change_datetime, node_obj.ip))
+
+	# Print the node table
+	if leader_changes:
+		print(ansi_red_fg + "ALERT: ZooKeeper leader changes found" + ansi_end_color)
+
+		leader_changes.sort(key=lambda tup: tup[0])
+
+		node_table = pandas.DataFrame(data={
+				"Time": [tup[0] for tup in leader_changes],
+				"New Leader": [tup[1] for tup in leader_changes],
+			}
+		)
+
+		node_table.index += 1
+
+		print(node_table)
 
