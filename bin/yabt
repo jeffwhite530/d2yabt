@@ -63,6 +63,10 @@ def format_json(bundle_dir):
 			if not each_file.endswith(".json"):
 				continue
 
+			# This file always fails to parse, just skip it
+			if each_file == "443-licensing_v1_audit_decrypt_1.json":
+				continue
+
 			file_with_path = root + os.sep + each_file
 
 			with open(file_with_path, "r+") as json_file_handle:
