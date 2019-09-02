@@ -179,19 +179,17 @@ def unreachable_agents_mesos_log(node_objs):
 
 
 
-def time_sync(node_objs):
-	"""Check if any time sync errors have occured.
+def check_time_failures(node_objs):
+	"""Check for any failures of DC/OS' check-time utility
 	"""
-	print("Checking for time sync errors")
+	print("Checking for check-time failures")
 
-	check_time_error_node_objs = list()
+	check_time_error_nodes = list()
 
 	for node_obj in node_objs:
-		for file_name in os.listdir(node_obj.dir):
-			# If we already found a check-time error on this node, move on to the next one
-			if node_obj in check_time_error_node_objs:
-				break
+		check_time_errors = 0
 
+		for file_name in os.listdir(node_obj.dir):
 			if not file_name.endswith(".service"):
 				continue
 
@@ -200,27 +198,27 @@ def time_sync(node_objs):
 					for each_line in log_file:
 						each_line = each_line.rstrip("\n")
 
-						if re.search("check-time' returned non-zero exit status", each_line) is not None:
-							node_obj.check_time_fail_count += 1
-
-							if node_obj not in check_time_error_node_objs:
-								check_time_error_node_objs.append(node_obj)
+						if re.search(r"check-time' returned non-zero exit status", each_line) is not None:
+							check_time_errors += 1
 
 				except UnicodeDecodeError:
 					continue
 
+		if not check_time_errors == 0:
+			check_time_error_nodes.append((node_obj, check_time_errors))
+
 	# Print the node table
-	if check_time_error_node_objs:
-		print(ansi_red_fg + "ALERT: check-time failures found" + ansi_end_color)
+	if check_time_error_nodes:
+		print(ansi_red_fg + "ALERT: Found nodes with check-time failures" + ansi_end_color)
 
 		node_table = pandas.DataFrame(data={
-				"IP": [o.ip for o in check_time_error_node_objs],
-				"Type": [o.type for o in check_time_error_node_objs],
-				"check-time Fails": [o.check_time_fail_count for o in check_time_error_node_objs],
+				"IP": [tup[0].ip for tup in check_time_error_nodes],
+				"Type": [tup[0].type for tup in check_time_error_nodes],
+				"check-time Failures": [tup[1] for tup in check_time_error_nodes],
 			}
 		)
 
-		node_table.sort_values("check-time Fails", inplace=True, ascending=False)
+		node_table.sort_values("check-time Failures", inplace=True, ascending=False)
 
 		node_table.reset_index(inplace=True, drop=True)
 
