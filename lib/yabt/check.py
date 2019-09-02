@@ -78,7 +78,7 @@ def firewall_running(node_objs):
 		if not os.path.exists(node_obj.dir + os.sep + "ps_aux_ww_Z.output"):
 			print("Unable to check for running firewall on", node_obj.ip + ", no ps output available")
 
-			break
+			continue
 
 		with open(node_obj.dir + os.sep + "ps_aux_ww_Z.output", "r") as ps_file:
 			for each_line in ps_file:
@@ -838,6 +838,54 @@ def inactive_frameworks(node_objs):
 				"ID": [tup[1] for tup in inactive_frameworks],
 			}
 		)
+
+		node_table.index += 1
+
+		print(node_table)
+
+
+
+def missing_dockerd(node_objs):
+	"""Check for agents which do not have a running Docker daemon
+	"""
+
+	print("Checking for missing Docker daemon on agents")
+
+	agents_missing_dockerd = list()
+
+	for node_obj in node_objs:
+		if node_obj.type == "master":
+			continue
+
+		if not os.path.exists(node_obj.dir + os.sep + "ps_aux_ww_Z.output"):
+			print("Unable to check for missing Docker daemon on", node_obj.ip + ", no ps output available")
+
+			continue
+
+		with open(node_obj.dir + os.sep + "ps_aux_ww_Z.output", "r") as ps_file:
+			found_dockerd = False
+
+			for each_line in ps_file:
+				if re.search("dockerd", each_line) is not None:
+					found_dockerd = True
+
+					break
+
+			if found_dockerd is False:
+				agents_missing_dockerd.append(node_obj.ip)
+
+	# Print the node table
+	if agents_missing_dockerd:
+		print(ansi_red_fg + "ALERT: Found agents with Docker daemon not running" + ansi_end_color)
+
+		node_table = pandas.DataFrame(data={
+				"IP": agents_missing_dockerd,
+			}
+		)
+
+		node_table.sort_values("IP", inplace=True)
+
+		node_table.reset_index(inplace=True, drop=True)
 
 		node_table.index += 1
 

@@ -158,6 +158,7 @@ if __name__ == "__main__":
 		yabt.check.firewall_running(node_objs)
 		yabt.check.state_size(node_objs)
 		yabt.check.inactive_frameworks(node_objs)
+		yabt.check.missing_dockerd(node_objs)
 		yabt.check.unreachable_agents_mesos_state(node_objs)
 
 	yabt.check.unreachable_agents_mesos_log(node_objs)
@@ -173,8 +174,6 @@ if __name__ == "__main__":
 	yabt.check.crdb_ranges(node_objs)
 
 	# TODO: check_mesos_master()
-	# TODO: Check for inactive frameworks
-	# TODO: Check for nodes missing the Docker daemon running
 	# TODO: Check for CRDB time sync events
 	# TODO: Check for private registry certificate errors
 	# TODO: Check for overlay master module in RECOVERING state events
