@@ -17,13 +17,13 @@ class Node(object):
 		self.dir = ""
 		self.dcos_version = ""
 		self.zk_fsync_warning_count = 0
-		self._zk_longest_fsyncs = [0, 0, 0, 0, 0]
+		self._zk_longest_fsyncs = list()
 		self.oom_invoked_count = 0
 		self._oom_procs = dict()
 
 
 	def add_zk_fsync(self, zk_fsync):
-		"""Add an ZK fsync time entry.  If it is longer that the top 5 it will be added to self._zk_longest_fsyncs.
+		"""Add an ZK fsync time entry.
 		"""
 		zk_fsync = int(zk_fsync)
 
@@ -31,7 +31,7 @@ class Node(object):
 
 		self._zk_longest_fsyncs.sort(reverse=True)
 
-		self._zk_longest_fsyncs.pop()
+		self._zk_longest_fsyncs = self._zk_longest_fsyncs[:5]
 
 
 	def get_longest_zk_fsyncs(self):
