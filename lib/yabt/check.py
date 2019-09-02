@@ -562,7 +562,7 @@ def crdb_monotonicity_error(node_objs):
 			continue
 
 		if os.path.exists(node_obj.dir + os.sep + "dcos-cockroach.service"):
-			crdb_log = node_obj.dir + os.sep + "dcos-cockraoch.service"
+			crdb_log = node_obj.dir + os.sep + "dcos-cockroach.service"
 
 		elif os.path.exists(node_obj.dir + os.sep + "dcos-cockroach.service.log"):
 			crdb_log = node_obj.dir + os.sep + "dcos-cockroach.service.log"
