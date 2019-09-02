@@ -175,6 +175,7 @@ if __name__ == "__main__":
 	yabt.check.oom_presence(node_objs)
 	yabt.check.crdb_underrep_ranges(node_objs)
 	yabt.check.crdb_monotonicity_error(node_objs)
+	yabt.check.crdb_contact_error(node_objs)
 
 	# TODO: check_mesos_master()
 	# TODO: Check for private registry certificate errors

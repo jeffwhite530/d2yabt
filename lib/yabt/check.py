@@ -554,7 +554,6 @@ def crdb_monotonicity_error(node_objs):
 
 	print("Checking for time sync errors in CRDB")
 
-
 	crdb_timesync_nodes = list()
 
 	for node_obj in node_objs:
@@ -591,6 +590,61 @@ def crdb_monotonicity_error(node_objs):
 		node_table = pandas.DataFrame(data={
 				"IP": [tup[0].ip for tup in crdb_timesync_nodes],
 				"Errors": [tup[1] for tup in crdb_timesync_nodes],
+			}
+		)
+
+		node_table.sort_values("Errors", inplace=True, ascending=False)
+
+		node_table.reset_index(inplace=True, drop=True)
+
+		node_table.index += 1
+
+		print(node_table)
+
+
+
+def crdb_contact_error(node_objs):
+	"""Check for CRDB being unable to connect to other instances
+	"""
+
+	print("Checking for instance communication errors in CRDB")
+
+	crdb_contact_error_nodes = list()
+
+	for node_obj in node_objs:
+		if not node_obj.type == "master":
+			continue
+
+		if os.path.exists(node_obj.dir + os.sep + "dcos-cockroach.service"):
+			crdb_log = node_obj.dir + os.sep + "dcos-cockroach.service"
+
+		elif os.path.exists(node_obj.dir + os.sep + "dcos-cockroach.service.log"):
+			crdb_log = node_obj.dir + os.sep + "dcos-cockroach.service.log"
+
+		else:
+			print("Unable to check for instance communication errors in CRDB on", node_obj.ip + ", no dcos-cockroach.service log found")
+
+			continue
+
+		error_count = 0
+
+		with open(crdb_log, "r") as crdb_log_handle:
+			for each_line in crdb_log_handle:
+				each_line = each_line.rstrip("\n")
+
+				if re.search("unable to contact the other nodes", each_line) is not None:
+					error_count += 1
+
+		if not error_count == 0:
+			crdb_contact_error_nodes.append((node_obj, error_count))
+
+	# Print the node table
+	if crdb_contact_error_nodes:
+		print(ansi_red_fg + "ALERT: Nodes with instance communication errors in CRDB found" + ansi_end_color)
+
+		node_table = pandas.DataFrame(data={
+				"IP": [tup[0].ip for tup in crdb_contact_error_nodes],
+				"Errors": [tup[1] for tup in crdb_contact_error_nodes],
 			}
 		)
 
