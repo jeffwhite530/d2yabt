@@ -746,9 +746,9 @@ def unreachable_agents_mesos_state(node_objs):
 			except json.decoder.JSONDecodeError:
 				print("Unable to check for unreachable agents, failed to parse 5050-registrar_1__registry.json", file=sys.stderr)
 
-				break
+				continue
 
-		if "unreachable" in json_data:
+		if "unreachable" in json_data and "slaves" in json_data["unreachable"]:
 			for entry in json_data["unreachable"]["slaves"]:
 				slave_id = entry["id"]["value"]
 
