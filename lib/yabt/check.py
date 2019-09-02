@@ -14,6 +14,7 @@ import json
 import re
 import pandas
 import datetime
+import glob
 
 
 
@@ -117,11 +118,14 @@ def unreachable_agents_mesos_log(node_objs):
 		if not node_obj.type == "master":
 			continue
 
-		if os.path.exists(node_obj.dir + os.sep + "dcos-mesos-master.service"):
-			mesos_log = node_obj.dir + os.sep + "dcos-mesos-master.service"
+		mesos_log_list = glob.glob(node_obj.dir + os.sep + "dcos-mesos-master.service*")
 
-		elif os.path.exists(node_obj.dir + os.sep + "dcos-mesos-master.service.log"):
-			mesos_log = node_obj.dir + os.sep + "dcos-mesos-master.service.log"
+		if not len(mesos_log_list) == 1:
+			print("Unable to find log for dcos-mesos-master.service on", node_obj.ip, "(got", len(mesos_log_list), "matches)")
+
+			continue
+
+		mesos_log = mesos_log_list[0]
 
 		with open(mesos_log, "r") as mesos_master_log:
 			for each_line in mesos_master_log:
@@ -238,22 +242,14 @@ def kmem_presence(node_objs):
 		if node_obj.type == "master":
 			continue
 
-		if os.path.exists(node_obj.dir + os.sep + "dmesg_-T-0.output"):
-			dmesg_file = node_obj.dir + os.sep + "dmesg_-T-0.output"
+		dmesg_file_list = glob.glob(node_obj.dir + os.sep + "dmesg*")
 
-		elif os.path.exists(node_obj.dir + os.sep + "dmesg_-T.output"):
-			dmesg_file = node_obj.dir + os.sep + "dmesg_-T.output"
+		if not len(dmesg_file_list) == 1:
+			print("Unable to find dmesg file on", node_obj.ip, "(got", len(dmesg_file_list), "matches)")
 
-		elif os.path.exists(node_obj.dir + os.sep + "dmesg-0.output"):
-			dmesg_file = node_obj.dir + os.sep + "dmesg-0.output"
+			continue
 
-		elif os.path.exists(node_obj.dir + os.sep + "dmesg_t.log"):
-			dmesg_file = node_obj.dir + os.sep + "dmesg_t.log"
-
-		else:
-			print("Unable to search for kmem bug on", node_obj.ip + ", no dmesg file found")
-
-			return
+		dmesg_file = dmesg_file_list[0]
 
 		kmem_slub_error_count = 0
 
@@ -299,11 +295,14 @@ def zk_fsync(node_objs):
 		if not node_obj.type == "master":
 			continue
 
-		if os.path.exists(node_obj.dir + os.sep + "dcos-exhibitor.service"):
-			exhibitor_log = node_obj.dir + os.sep + "dcos-exhibitor.service"
+		exhibitor_log_list = glob.glob(node_obj.dir + os.sep + "dcos-exhibitor.service*")
 
-		elif os.path.exists(node_obj.dir + os.sep + "dcos-exhibitor.service.log"):
-			exhibitor_log = node_obj.dir + os.sep + "dcos-exhibitor.service.log"
+		if not len(exhibitor_log_list) == 1:
+			print("Unable to find log for dcos-exhibitor.service on", node_obj.ip, "(got", len(exhibitor_log_list), "matches)")
+
+			continue
+
+		exhibitor_log = exhibitor_log_list[0]
 
 		with open(exhibitor_log, "r") as zk_file_handle:
 			for each_line in zk_file_handle:
@@ -351,11 +350,14 @@ def zk_diskspace(node_objs):
 		if not node_obj.type == "master":
 			continue
 
-		if os.path.exists(node_obj.dir + os.sep + "dcos-exhibitor.service"):
-			exhibitor_log = node_obj.dir + os.sep + "dcos-exhibitor.service"
+		exhibitor_log_list = glob.glob(node_obj.dir + os.sep + "dcos-exhibitor.service*")
 
-		elif os.path.exists(node_obj.dir + os.sep + "dcos-exhibitor.service.log"):
-			exhibitor_log = node_obj.dir + os.sep + "dcos-exhibitor.service.log"
+		if not len(exhibitor_log_list) == 1:
+			print("Unable to find log for dcos-exhibitor.service on", node_obj.ip, "(got", len(exhibitor_log_list), "matches)")
+
+			continue
+
+		exhibitor_log = exhibitor_log_list[0]
 
 		with open(exhibitor_log, "r") as zk_file_handle:
 			for each_line in zk_file_handle:
@@ -396,11 +398,14 @@ def zk_connection_exception(node_objs):
 		if not node_obj.type == "master":
 			continue
 
-		if os.path.exists(node_obj.dir + os.sep + "dcos-exhibitor.service"):
-			exhibitor_log = node_obj.dir + os.sep + "dcos-exhibitor.service"
+		exhibitor_log_list = glob.glob(node_obj.dir + os.sep + "dcos-exhibitor.service*")
 
-		elif os.path.exists(node_obj.dir + os.sep + "dcos-exhibitor.service.log"):
-			exhibitor_log = node_obj.dir + os.sep + "dcos-exhibitor.service.log"
+		if not len(exhibitor_log_list) == 1:
+			print("Unable to find log for dcos-exhibitor.service on", node_obj.ip, "(got", len(exhibitor_log_list), "matches)")
+
+			continue
+
+		exhibitor_log = exhibitor_log_list[0]
 
 		with open(exhibitor_log, "r") as zk_file_handle:
 			for each_line in zk_file_handle:
@@ -445,22 +450,14 @@ def oom_presence(node_objs):
 	oom_node_objs = list()
 
 	for node_obj in node_objs:
-		if os.path.exists(node_obj.dir + os.sep + "dmesg_-T-0.output"):
-			dmesg_file = node_obj.dir + os.sep + "dmesg_-T-0.output"
+		dmesg_file_list = glob.glob(node_obj.dir + os.sep + "dmesg*")
 
-		elif os.path.exists(node_obj.dir + os.sep + "dmesg_-T.output"):
-			dmesg_file = node_obj.dir + os.sep + "dmesg_-T.output"
+		if not len(dmesg_file_list) == 1:
+			print("Unable to find dmesg file on", node_obj.ip, "(got", len(dmesg_file_list), "matches)")
 
-		elif os.path.exists(node_obj.dir + os.sep + "dmesg-0.output"):
-			dmesg_file = node_obj.dir + os.sep + "dmesg-0.output"
+			continue
 
-		elif os.path.exists(node_obj.dir + os.sep + "dmesg_t.log"):
-			dmesg_file = node_obj.dir + os.sep + "dmesg_t.log"
-
-		else:
-			print("Unable to search for ooms on", node_obj.ip + ", no dmesg file found")
-
-			return
+		dmesg_file = dmesg_file_list[0]
 
 		with open(dmesg_file, "r") as dmesg_file_handle:
 			for each_line in dmesg_file_handle:
@@ -509,16 +506,14 @@ def crdb_underrep_ranges(node_objs):
 		if not node_obj.type == "master":
 			continue
 
-		if os.path.exists(node_obj.dir + os.sep + "dcos-checks-poststart.service"):
-			poststart_log = node_obj.dir + os.sep + "dcos-checks-poststart.service"
+		poststart_log_list = glob.glob(node_obj.dir + os.sep + "dcos-checks-poststart.service*")
 
-		elif os.path.exists(node_obj.dir + os.sep + "dcos-checks-poststart.service.log"):
-			poststart_log = node_obj.dir + os.sep + "dcos-checks-poststart.service.log"
-
-		else:
-			print("Unable to check for underreplicated ranges in CRDB on", node_obj.ip + ", no dcos-checks-poststart.service log found")
+		if not len(poststart_log_list) == 1:
+			print("Unable to find dcos-checks-poststart.service log on", node_obj.ip, "(got", len(poststart_log_list), "matches)")
 
 			continue
+
+		poststart_log = poststart_log_list[0]
 
 		with open(poststart_log, "r") as poststart_file:
 			for each_line in poststart_file:
@@ -560,16 +555,14 @@ def crdb_monotonicity_error(node_objs):
 		if not node_obj.type == "master":
 			continue
 
-		if os.path.exists(node_obj.dir + os.sep + "dcos-cockroach.service"):
-			crdb_log = node_obj.dir + os.sep + "dcos-cockroach.service"
+		crdb_log_list = glob.glob(node_obj.dir + os.sep + "dcos-cockroach.service*")
 
-		elif os.path.exists(node_obj.dir + os.sep + "dcos-cockroach.service.log"):
-			crdb_log = node_obj.dir + os.sep + "dcos-cockroach.service.log"
-
-		else:
-			print("Unable to check for time sync errors in CRDB on", node_obj.ip + ", no dcos-cockroach.service log found")
+		if not len(crdb_log_list) == 1:
+			print("Unable to find dcos-cockroach.service log on", node_obj.ip, "(got", len(crdb_log_list), "matches)")
 
 			continue
+
+		crdb_log = crdb_log_list[0]
 
 		error_count = 0
 
@@ -615,16 +608,14 @@ def crdb_contact_error(node_objs):
 		if not node_obj.type == "master":
 			continue
 
-		if os.path.exists(node_obj.dir + os.sep + "dcos-cockroach.service"):
-			crdb_log = node_obj.dir + os.sep + "dcos-cockroach.service"
+		crdb_log_list = glob.glob(node_obj.dir + os.sep + "dcos-cockroach.service*")
 
-		elif os.path.exists(node_obj.dir + os.sep + "dcos-cockroach.service.log"):
-			crdb_log = node_obj.dir + os.sep + "dcos-cockroach.service.log"
-
-		else:
-			print("Unable to check for instance communication errors in CRDB on", node_obj.ip + ", no dcos-cockroach.service log found")
+		if not len(crdb_log_list) == 1:
+			print("Unable to find dcos-cockroach.service log on", node_obj.ip, "(got", len(crdb_log_list), "matches)")
 
 			continue
+
+		crdb_log = crdb_log_list[0]
 
 		error_count = 0
 
@@ -690,11 +681,14 @@ def mesos_leader_changes(node_objs):
 		if not node_obj.type == "master":
 			continue
 
-		if os.path.exists(node_obj.dir + os.sep + "dcos-mesos-master.service"):
-			mesos_log = node_obj.dir + os.sep + "dcos-mesos-master.service"
+		mesos_log_list = glob.glob(node_obj.dir + os.sep + "dcos-mesos-master.service*")
 
-		elif os.path.exists(node_obj.dir + os.sep + "dcos-mesos-master.service.log"):
-			mesos_log = node_obj.dir + os.sep + "dcos-mesos-master.service.log"
+		if not len(mesos_log_list) == 1:
+			print("Unable to find log for dcos-mesos-master.service on", node_obj.ip, "(got", len(mesos_log_list), "matches)")
+
+			continue
+
+		mesos_log = mesos_log_list[0]
 
 		with open(mesos_log, "r") as mesos_master_log:
 			for each_line in mesos_master_log:
@@ -741,11 +735,14 @@ def zk_leader_changes(node_objs):
 		if not node_obj.type == "master":
 			continue
 
-		if os.path.exists(node_obj.dir + os.sep + "dcos-exhibitor.service"):
-			exhibitor_log = node_obj.dir + os.sep + "dcos-exhibitor.service"
+		exhibitor_log_list = glob.glob(node_obj.dir + os.sep + "dcos-exhibitor.service*")
 
-		elif os.path.exists(node_obj.dir + os.sep + "dcos-exhibitor.service.log"):
-			exhibitor_log = node_obj.dir + os.sep + "dcos-exhibitor.service.log"
+		if not len(exhibitor_log_list) == 1:
+			print("Unable to find log for dcos-exhibitor.service on", node_obj.ip, "(got", len(exhibitor_log_list), "matches)")
+
+			continue
+
+		exhibitor_log = exhibitor_log_list[0]
 
 		with open(exhibitor_log, "r") as exhibitor_log_handle:
 			for each_line in exhibitor_log_handle:
@@ -791,16 +788,14 @@ def marathon_leader_changes(node_objs):
 		if not node_obj.type == "master":
 			continue
 
-		if os.path.exists(node_obj.dir + os.sep + "dcos-marathon.service"):
-			marathon_log = node_obj.dir + os.sep + "dcos-marathon.service"
+		marathon_log_list = glob.glob(node_obj.dir + os.sep + "dcos-marathon.service*")
 
-		elif os.path.exists(node_obj.dir + os.sep + "dcos-marathon.service.log"):
-			marathon_log = node_obj.dir + os.sep + "dcos-marathon.service.log"
-
-		else:
-			print("Failed to find Marathon log on", node_obj.ip, file=sys.stderr)
+		if not len(marathon_log_list) == 1:
+			print("Unable to find log for dcos-marathon.service on", node_obj.ip, "(got", len(marathon_log_list), "matches)")
 
 			continue
+
+		marathon_log = marathon_log_list[0]
 
 		with open(marathon_log, "r") as marathon_log_handle:
 			for each_line in marathon_log_handle:
