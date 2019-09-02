@@ -172,9 +172,9 @@ if __name__ == "__main__":
 	yabt.check.zk_connection_exception(node_objs)
 	yabt.check.oom_presence(node_objs)
 	yabt.check.crdb_underrep_ranges(node_objs)
+	yabt.check.crdb_monotonicity_error(node_objs)
 
 	# TODO: check_mesos_master()
-	# TODO: Check for CRDB time sync events
 	# TODO: Check for private registry certificate errors
 	# TODO: Check for overlay master module in RECOVERING state events
 
