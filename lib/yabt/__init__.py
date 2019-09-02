@@ -16,7 +16,6 @@ class Node(object):
 		self.type = ""
 		self.dir = ""
 		self.dcos_version = ""
-		self.firewalld_running = None
 		self.check_time_fail_count = 0
 		self.kmem_slub_error_count = 0
 		self.zk_fsync_warning_count = 0

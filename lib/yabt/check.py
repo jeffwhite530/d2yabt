@@ -72,7 +72,7 @@ def firewall_running(node_objs):
 	"""
 	print("Checking for running firewall")
 
-	firewall_node_objs = list()
+	nodes_with_firewalld = list()
 
 	for node_obj in sorted(node_objs, key=lambda x: x.type):
 		if not os.path.exists(node_obj.dir + os.sep + "ps_aux_ww_Z.output"):
@@ -85,22 +85,19 @@ def firewall_running(node_objs):
 				each_line = each_line.rstrip("\n")
 
 				if re.search("firewalld", each_line) is not None:
-					node_obj.firewalld_running = True
-
-					firewall_node_objs.append(node_obj)
+					nodes_with_firewalld.append(node_obj)
 
 	# Print the node table
-	if firewall_node_objs:
-		print(ansi_red_fg + "ALERT: firewalld found running" + ansi_end_color)
+	if nodes_with_firewalld:
+		print(ansi_red_fg + "ALERT: Agents with firewalld running found" + ansi_end_color)
 
 		node_table = pandas.DataFrame(data={
-				"IP": [o.ip for o in firewall_node_objs],
-				"Type": [o.type for o in firewall_node_objs],
-				"firewalld": [o.firewalld_running for o in firewall_node_objs]
+				"IP": [o.ip for o in nodes_with_firewalld],
+				"Type": [o.type for o in nodes_with_firewalld]
 			}
 		)
 
-		node_table.sort_values("firewalld", inplace=True)
+		node_table.sort_values("Type", inplace=True)
 
 		node_table.reset_index(inplace=True, drop=True)
 
