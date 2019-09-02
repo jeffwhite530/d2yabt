@@ -232,7 +232,7 @@ def kmem_presence(node_objs):
 	"""
 	print("Checking for kmem bug")
 
-	kmem_error_node_objs = list()
+	kmem_error_nodes = list()
 
 	for node_obj in node_objs:
 		if node_obj.type == "master":
@@ -255,24 +255,26 @@ def kmem_presence(node_objs):
 
 			return
 
+		kmem_slub_error_count = 0
+
 		with open(dmesg_file, "r") as dmesg_file_handle:
 			for each_line in dmesg_file_handle:
 				each_line = each_line.rstrip("\n")
 
 				if re.search("SLUB: Unable to allocate memory on node -1", each_line) is not None:
-					node_obj.kmem_slub_error_count += 1
+					kmem_slub_error_count += 1
 
-					if node_obj not in kmem_error_node_objs:
-						kmem_error_node_objs.append(node_obj)
+		if not kmem_slub_error_count == 0:
+			kmem_error_nodes.append((node_obj, kmem_slub_error_count))
 
 	# Print the node table
-	if kmem_error_node_objs:
-		print(ansi_red_fg + "ALERT: kmem SLUB errors found" + ansi_end_color)
+	if kmem_error_nodes:
+		print(ansi_red_fg + "ALERT: Agents with kmem SLUB errors found" + ansi_end_color)
 
 		node_table = pandas.DataFrame(data={
-				"IP": [o.ip for o in kmem_error_node_objs],
-				"Type": [o.type for o in kmem_error_node_objs],
-				"kmem SLUB Errors": [o.kmem_slub_error_count for o in kmem_error_node_objs],
+				"IP": [tup[0].ip for tup in kmem_error_nodes],
+				"Type": [tup[0].type for tup in kmem_error_nodes],
+				"kmem SLUB Errors": [tup[1] for tup in kmem_error_nodes],
 			}
 		)
 

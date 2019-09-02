@@ -16,7 +16,6 @@ class Node(object):
 		self.type = ""
 		self.dir = ""
 		self.dcos_version = ""
-		self.kmem_slub_error_count = 0
 		self.zk_fsync_warning_count = 0
 		self._zk_longest_fsyncs = [0, 0, 0, 0, 0]
 		self.oom_invoked_count = 0
