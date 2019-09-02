@@ -45,7 +45,6 @@ def dcos_version(node_objs):
 
 	dcos_versions_set = set(dcos_versions_list)
 
-
 	# Print the node table
 	if not len(dcos_versions_set) == 1:
 		print(ansi_red_fg + "ALERT: Non-matching DC/OS versions found" + ansi_end_color)
@@ -266,7 +265,6 @@ def kmem_presence(node_objs):
 					if node_obj not in kmem_error_node_objs:
 						kmem_error_node_objs.append(node_obj)
 
-
 	# Print the node table
 	if kmem_error_node_objs:
 		print(ansi_red_fg + "ALERT: kmem SLUB errors found" + ansi_end_color)
@@ -319,7 +317,6 @@ def zk_fsync(node_objs):
 					if node_obj not in zk_fsync_node_objs:
 						zk_fsync_node_objs.append(node_obj)
 
-
 	# Print the node table
 	if zk_fsync_node_objs:
 		print(ansi_red_fg + "ALERT: ZooKeeper slow fsync found" + ansi_end_color)
@@ -346,7 +343,7 @@ def zk_diskspace(node_objs):
 	"""
 	print("Checking for disk space errors in ZooKeeper")
 
-	zk_diskspace_node_objs = list()
+	zk_diskspace_nodes = list()
 
 	for node_obj in node_objs:
 		if not node_obj.type == "master":
@@ -363,24 +360,20 @@ def zk_diskspace(node_objs):
 				each_line = each_line.rstrip("\n")
 
 				if re.search("No space left on device", each_line) is not None:
-					node_obj.zk_diskspace_error_found = True
-
-					zk_diskspace_node_objs.append(node_obj)
+					zk_diskspace_nodes.append(node_obj.ip)
 
 					break
 
-
 	# Print the node table
-	if zk_diskspace_node_objs:
+	if zk_diskspace_nodes:
 		print(ansi_red_fg + "ALERT: ZooKeeper disk space error found" + ansi_end_color)
 
 		node_table = pandas.DataFrame(data={
-				"IP": [o.ip for o in zk_diskspace_node_objs],
-				"ZK Disk Space Error": [o.zk_diskspace_error_found for o in zk_diskspace_node_objs],
+				"IP": zk_diskspace_nodes,
 			}
 		)
 
-		node_table.sort_values("ZK Disk Space Error", inplace=True, ascending=False)
+		node_table.sort_values("IP", inplace=True, ascending=False)
 
 		node_table.reset_index(inplace=True, drop=True)
 
@@ -421,7 +414,6 @@ def zk_connection_exception(node_objs):
 
 					except KeyError:
 						zk_connection_exceptions[exception_connection] = 1
-
 
 	# Print the node table
 	if zk_connection_exceptions:
@@ -482,7 +474,6 @@ def oom_presence(node_objs):
 					if node_obj not in oom_node_objs:
 						oom_node_objs.append(node_obj)
 
-					
 	# Print the node table
 	if oom_node_objs:
 		print(ansi_red_fg + "ALERT: Instances of oom-killer found" + ansi_end_color)
@@ -536,7 +527,6 @@ def crdb_underrep_ranges(node_objs):
 
 					break
 
-
 	# Print the node table
 	if underrep_ranges_nodes:
 		print(ansi_red_fg + "ALERT: Nodes with under-replicated ranges in CRDB found" + ansi_end_color)
@@ -573,6 +563,7 @@ def state_size(node_objs):
 				print(ansi_red_fg + "ALERT: Mesos state.json is larger than 5MB (" + str(round(state_size_bytes / 1024 / 1024, 2)) + " MB)" + ansi_end_color)
 
 			break
+
 
 
 def mesos_leader_changes(node_objs):

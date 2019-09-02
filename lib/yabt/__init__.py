@@ -21,7 +21,6 @@ class Node(object):
 		self._zk_longest_fsyncs = [0, 0, 0, 0, 0]
 		self.oom_invoked_count = 0
 		self._oom_procs = dict()
-		self.zk_diskspace_error_found = False
 
 
 	def add_zk_fsync(self, zk_fsync):
