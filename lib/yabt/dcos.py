@@ -150,7 +150,9 @@ def get_nodes(bundle_dir, bundle_type):
 
 
 	if len(node_objs) == 0:
-		raise(Exception("Failed to find any nodes in the bundle directory"))
+		print("Failed to find any nodes in the bundle directory", file=sys.stderr)
+
+		sys.exit(1)
 
 	return node_objs
 

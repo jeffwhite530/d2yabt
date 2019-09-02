@@ -136,14 +136,16 @@ if __name__ == "__main__":
 
 		bundle_dir = yabt.dcos.extract_oneliner(bundle_name)
 
-	elif os.path.isdir(bundle_name):
+	elif os.path.isdir(bundle_name) and os.path.exists(bundle_name + os.sep + "summaryReport.txt"):
 		bundle_dir = bundle_name
 		bundle_type = "diag_bundle"
 
+	elif os.path.isdir(bundle_name) and not os.path.exists(bundle_name + os.sep + "summaryReport.txt"):
+		bundle_dir = bundle_name
+		bundle_type = "oneliner_bundle"
+
 	else:
 		print("Unable to determine bundle type", file=sys.stderr)
-
-	# FIXME: Support already-extracted oneliner bundle
 
 
 	# Create the node objects list
