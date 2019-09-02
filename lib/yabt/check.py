@@ -505,12 +505,12 @@ def oom_presence(node_objs):
 
 
 
-def crdb_ranges(node_objs):
-	"""Check the health of CockroachDB"
+def crdb_underrep_ranges(node_objs):
+	"""Check for underreplicated ranges in CRDB"
 	"""
-	print("Checking CRBD")
+	print("Checking for underreplicated ranges in CRBD")
 
-	underrep_ranges_node_objs = list()
+	underrep_ranges_nodes = list()
 
 	for node_obj in node_objs:
 		if not node_obj.type == "master":
@@ -532,21 +532,17 @@ def crdb_ranges(node_objs):
 				each_line = each_line.rstrip("\n")
 			
 				if re.search("CockroachDB has underreplicated ranges", each_line) is not None:
-					node_obj.crdb_has_underrep_ranges = True
-
-					underrep_ranges_node_objs.append(node_obj)
+					underrep_ranges_nodes.append(node_obj.ip)
 
 					break
 
 
 	# Print the node table
-	if underrep_ranges_node_objs:
-		print(ansi_red_fg + "ALERT: CRDB under-replicated ranges found" + ansi_end_color)
+	if underrep_ranges_nodes:
+		print(ansi_red_fg + "ALERT: Nodes with under-replicated ranges in CRDB found" + ansi_end_color)
 
 		node_table = pandas.DataFrame(data={
-				"IP": [o.ip for o in underrep_ranges_node_objs],
-				"Type": [o.type for o in underrep_ranges_node_objs],
-				"CRDB Underreplicated Ranges": [o.crdb_has_underrep_ranges for o in underrep_ranges_node_objs],
+				"IP": underrep_ranges_nodes,
 			}
 		)
 
