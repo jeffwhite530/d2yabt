@@ -199,7 +199,7 @@ if __name__ == "__main__":
 		print("Bundle has already been extracted, using existing directory", bundle_dir)
 
 	elif bundle_type == "dcos_diag" and os.path.isfile(bundle_name):
-		bundle_dir = yabt.dcos.bundle.extract_bundle(bundle_name)
+		bundle_dir = yabt.dcos.bundle.extract_diag(bundle_name)
 		decompress_gzip_files(bundle_dir)
 		format_json(bundle_dir)
 

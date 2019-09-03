@@ -18,7 +18,7 @@ import subprocess
 
 
 
-def extract_bundle(bundle_name):
+def extract_diag(bundle_name):
 	"""Expand the bundle into a directory unless that directory already exists.
 	"""
 
