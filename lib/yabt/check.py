@@ -131,6 +131,9 @@ def unreachable_agents_mesos_log(node_objs):
 			for each_line in mesos_master_log:
 				each_line = each_line.rstrip("\n")
 
+				if re.search(r"Marking agent.*unreachable", each_line) is None:
+					continue
+
 				match = re.search(r"(\d+-\d+-\d+).*(\d+:\d+:\d+\.\d+).*Marking agent.*\((\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})\) unreachable", each_line)
 
 				if match is not None:
@@ -410,6 +413,9 @@ def zk_connection_exception(node_objs):
 		with open(exhibitor_log, "r") as zk_file_handle:
 			for each_line in zk_file_handle:
 				each_line = each_line.rstrip("\n")
+
+				if re.search(r"Unexpected exception, tries=3, connecting to", each_line) is None:
+					continue
 
 				match = re.search(r"Unexpected exception, tries=3, connecting to /(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}):2888", each_line)
 
@@ -694,6 +700,9 @@ def mesos_leader_changes(node_objs):
 			for each_line in mesos_master_log:
 				each_line = each_line.rstrip("\n")
 
+				if re.search(r"new leading master", each_line) is None:
+					continue
+
 				match = re.search(r"(\d+-\d+-\d+) (\d+:\d+:\d+\.\d+) .* A new leading master \(UPID=master@(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}):5050\) is detected", each_line)
 
 				if match is not None:
@@ -748,6 +757,9 @@ def zk_leader_changes(node_objs):
 			for each_line in exhibitor_log_handle:
 				each_line = each_line.rstrip("\n")
 
+				if re.search(r"LEADING$", each_line) is None:
+					continue
+
 				match = re.search(r"(\d+-\d+-\d+) (\d+:\d+:\d+\.\d+) .* LEADING$", each_line)
 
 				if match is not None:
@@ -800,6 +812,9 @@ def marathon_leader_changes(node_objs):
 		with open(marathon_log, "r") as marathon_log_handle:
 			for each_line in marathon_log_handle:
 				each_line = each_line.rstrip("\n")
+
+				if re.search(r"Leader won:", each_line) is None:
+					continue
 
 				match = re.search(r"(\d+-\d+-\d+) (\d+:\d+:\d+\.\d+) .* Leader won: (\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}):8443", each_line)
 
