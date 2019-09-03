@@ -19,7 +19,7 @@ import subprocess
 
 
 def extract_diag(bundle_name):
-	"""Expand the bundle into a directory unless that directory already exists.
+	"""Expand the DC/OS bundle into a directory.
 	"""
 
 	bundle_name_base = os.path.basename(bundle_name)
@@ -33,7 +33,7 @@ def extract_diag(bundle_name):
 
 	bundle_dir = bundle_name[:-4]
 
-	print("Extracting bundle to", bundle_dir)
+	print("Extracting DC/OS diagnostic bundle to", bundle_dir)
 
 	os.mkdir(bundle_dir)
 
@@ -63,7 +63,7 @@ def extract_diag(bundle_name):
 
 
 def extract_oneliner(bundle_name):
-	"""Expand the one-liner bundle into a directory unless that directory already exists.
+	"""Expand the oneliner bundle into a directory.
 	"""
 
 	bundle_name_base = os.path.basename(bundle_name)
@@ -79,7 +79,7 @@ def extract_oneliner(bundle_name):
 
 	os.mkdir(bundle_dir)
 
-	print("Extracting oneliner bundle to", bundle_dir)
+	print("Extracting DC/OS oneliner bundle to", bundle_dir)
 
 	tarfile_obj = tarfile.open(bundle_name, "r:gz")
 

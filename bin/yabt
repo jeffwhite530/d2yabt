@@ -90,6 +90,7 @@ def get_bundle_type(bundle):
 	"""Determine the type of bundle given and return a string of either:
 		* dcos_diag
 		* dcos_oneliner
+		* service_diag
 	"""
 
 	if os.path.isdir(bundle_name):
@@ -102,6 +103,9 @@ def get_bundle_type(bundle):
 		if glob.glob(bundle_name + os.sep + "dcos-mesos-slave*.service.log"):
 			return "dcos_oneliner"
 
+		if glob.glob(bundle_name + os.sep + "dcos_services.json"):
+			return "service_diag"
+
 	elif os.path.isfile(bundle_name):
 		if bundle_name.endswith(".zip"):
 			myzip = zipfile.ZipFile(bundle_name)
@@ -109,6 +113,9 @@ def get_bundle_type(bundle):
 			for each in myzip.namelist():
 				if each.endswith("_master/dcos-mesos-master.service.gz"):
 					return "dcos_diag"
+
+				if each.endswith("dcos_services.json"):
+					return "service_diag"
 
 		if bundle_name.endswith(".tgz"):
 			mytar = tarfile.open(bundle_name, "r:gz")
@@ -177,9 +184,6 @@ if __name__ == "__main__":
 		bundle_name = yabt_args.bundle_name[0]
 
 
-	# TODO: Support service diagnostic bundles
-
-
 	# Does the named bundle exist?
 	if not os.path.exists(bundle_name):
 		print("No such bundle found:", bundle_name, file=sys.stderr)
@@ -198,23 +202,26 @@ if __name__ == "__main__":
 
 		print("Bundle has already been extracted, using existing directory", bundle_dir)
 
-	elif bundle_type == "dcos_diag" and os.path.isfile(bundle_name):
+	elif bundle_type == "dcos_diag":
 		bundle_dir = yabt.dcos.bundle.extract_diag(bundle_name)
 		decompress_gzip_files(bundle_dir)
 		format_json(bundle_dir)
 
-	elif bundle_type == "dcos_oneliner" and os.path.isfile(bundle_name):
+	elif bundle_type == "dcos_oneliner":
 		bundle_dir = yabt.dcos.bundle.extract_oneliner(bundle_name)
+
+	elif bundle_type == "service_diag":
+		bundle_dir = yabt.service.bundle.extract(bundle_name)
 
 
 	# Create the node objects list
-	node_objs = yabt.dcos.bundle.get_nodes(bundle_dir, bundle_type)
-
-	yabt.dcos.bundle.print_nodes(node_objs)
+	if bundle_type == "dcos_diag" or bundle_type == "dcos_oneliner":
+		node_objs = yabt.dcos.bundle.get_nodes(bundle_dir, bundle_type)
+		yabt.dcos.bundle.print_nodes(node_objs)
 
 
 	# Health checks
-	if bundle_type == "diag_bundle":
+	if bundle_type == "dcos_diag":
 		yabt.dcos.check.dcos_version(node_objs)
 		yabt.dcos.check.firewall_running(node_objs)
 		yabt.dcos.check.state_size(node_objs)
@@ -222,19 +229,20 @@ if __name__ == "__main__":
 		yabt.dcos.check.missing_dockerd(node_objs)
 		yabt.dcos.check.unreachable_agents_mesos_state(node_objs)
 
-	yabt.dcos.check.unreachable_agents_mesos_log(node_objs)
-	yabt.dcos.check.mesos_leader_changes(node_objs)
-	yabt.dcos.check.zk_leader_changes(node_objs)
-	yabt.dcos.check.marathon_leader_changes(node_objs)
-	yabt.dcos.check.check_time_failures(node_objs)
-	yabt.dcos.check.kmem_presence(node_objs)
-	yabt.dcos.check.zk_fsync(node_objs)
-	yabt.dcos.check.zk_diskspace(node_objs)
-	yabt.dcos.check.zk_connection_exception(node_objs)
-	yabt.dcos.check.oom_presence(node_objs)
-	yabt.dcos.check.crdb_underrep_ranges(node_objs)
-	yabt.dcos.check.crdb_monotonicity_error(node_objs)
-	yabt.dcos.check.crdb_contact_error(node_objs)
+	if bundle_type == "dcos_diag" or bundle_type == "dcos_oneliner":
+		yabt.dcos.check.unreachable_agents_mesos_log(node_objs)
+		yabt.dcos.check.mesos_leader_changes(node_objs)
+		yabt.dcos.check.zk_leader_changes(node_objs)
+		yabt.dcos.check.marathon_leader_changes(node_objs)
+		yabt.dcos.check.check_time_failures(node_objs)
+		yabt.dcos.check.kmem_presence(node_objs)
+		yabt.dcos.check.zk_fsync(node_objs)
+		yabt.dcos.check.zk_diskspace(node_objs)
+		yabt.dcos.check.zk_connection_exception(node_objs)
+		yabt.dcos.check.oom_presence(node_objs)
+		yabt.dcos.check.crdb_underrep_ranges(node_objs)
+		yabt.dcos.check.crdb_monotonicity_error(node_objs)
+		yabt.dcos.check.crdb_contact_error(node_objs)
 
 	# TODO: check_mesos_master()
 	# TODO: Check for private registry certificate errors

@@ -5,6 +5,7 @@
 import operator
 from yabt.dcos import bundle
 from yabt.dcos import check
+from yabt.service import bundle
 
 
 
