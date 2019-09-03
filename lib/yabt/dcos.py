@@ -21,81 +21,71 @@ import subprocess
 def extract_bundle(bundle_name):
 	"""Expand the bundle into a directory unless that directory already exists.
 	"""
-	if os.path.isfile(bundle_name):
-		bundle_name_base = os.path.basename(bundle_name)
 
-		bundle_dir = bundle_name_base[:-4]
+	bundle_name_base = os.path.basename(bundle_name)
 
-		if os.path.exists(bundle_dir):
-			print("Bundle has already been extracted, using existing directory")
+	if not bundle_name == bundle_name_base:
+		os.rename(bundle_name, bundle_name_base)
 
-		else:
-			print("Extracting bundle to", bundle_dir)
+		print("Moved", bundle_name_base, "to the current working directory")
 
-			os.mkdir(bundle_dir)
+		bundle_name = bundle_name_base
 
-			try:
-				zip_ref = zipfile.ZipFile(bundle_name, "r")
-				zip_ref.extractall(bundle_dir)
-				zip_ref.close()
+	bundle_dir = bundle_name[:-4]
 
-			except zipfile.BadZipFile:
-				print("Failed to extract bundle, corrupt zip?  Attempting to extract with 7zip", file=sys.stderr)
+	print("Extracting bundle to", bundle_dir)
 
-				zip7_command = shutil.which("7z")
+	os.mkdir(bundle_dir)
 
-				if zip7_command is None:
-					print("7zip command (7z) not found.  Please install 7zip.", file=sys.stderr)
+	try:
+		zip_ref = zipfile.ZipFile(bundle_name, "r")
+		zip_ref.extractall(bundle_dir)
+		zip_ref.close()
 
-					sys.exit(1)
+	except zipfile.BadZipFile:
+		print("Failed to extract bundle, corrupt zip?  Attempting to extract with 7zip", file=sys.stderr)
 
-				zip7_process = subprocess.Popen([zip7_command, "x", "-o" + bundle_dir, "-y", bundle_name], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+		zip7_command = shutil.which("7z")
 
-				zip7_process.wait()
+		if zip7_command is None:
+			print("7zip command (7z) not found.  Please install 7zip.", file=sys.stderr)
 
-				# Note that we're not checking if 7zip was successful because it will exit non-zero even if it was able to partially extract the zip.
+			sys.exit(1)
 
-		if not bundle_name == bundle_name_base:
-			os.rename(bundle_name, bundle_name_base)
+		zip7_process = subprocess.Popen([zip7_command, "x", "-o" + bundle_dir, "-y", bundle_name], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
-			print("Moved", bundle_name_base, "to the current working directory")
+		zip7_process.wait()
 
-	elif os.path.isdir(bundle_name):
-		bundle_dir = bundle_name
+		# Note that we're not checking if 7zip was successful because it will exit non-zero even if it was able to partially extract the zip.
 
 	return bundle_dir
+
 
 
 def extract_oneliner(bundle_name):
 	"""Expand the one-liner bundle into a directory unless that directory already exists.
 	"""
 
-	if os.path.isfile(bundle_name):
-		bundle_name_base = os.path.basename(bundle_name)
+	bundle_name_base = os.path.basename(bundle_name)
 
-		bundle_dir = bundle_name_base[:-4]
+	if not bundle_name == bundle_name_base:
+		os.rename(bundle_name, bundle_name_base)
 
-		if os.path.exists(bundle_dir):
-			print("Bundle has already been extracted, using existing directory")
+		print("Moved", bundle_name_base, "to the current working directory")
 
-		else:
-			os.mkdir(bundle_dir)
+		bundle_name = bundle_name_base
 
-			print("Extracting oneliner bundle to", bundle_dir)
+	bundle_dir = bundle_name[:-4]
 
-			tarfile_obj = tarfile.open(bundle_name, "r:gz")
+	os.mkdir(bundle_dir)
 
-			tarfile_obj.extractall(bundle_dir)
+	print("Extracting oneliner bundle to", bundle_dir)
 
-			tarfile_obj.close()
+	tarfile_obj = tarfile.open(bundle_name, "r:gz")
 
-		if not bundle_name == bundle_name_base:
-			os.rename(bundle_name, bundle_name_base)
+	tarfile_obj.extractall(bundle_dir)
 
-			print("Moved", bundle_name_base, "to the current working directory")
-
-	elif os.path.isdir(bundle_name):
-		bundle_dir = bundle_name
+	tarfile_obj.close()
 
 	return bundle_dir
 
@@ -108,25 +98,7 @@ def get_nodes(bundle_dir, bundle_type):
 
 	node_objs = list()
 
-	if bundle_type == "oneliner_bundle":
-		node_obj = yabt.Node()
-
-		node_obj.dir = bundle_dir
-
-		node_obj.ip = "unknown"
-
-		if os.path.exists(bundle_dir + os.sep + "dcos-mesos-master.service.log"):
-			node_obj.type = "master"
-
-		elif os.path.exists(bundle_dir + os.sep + "dcos-mesos-slave.service.log"):
-			node_obj.type = "priv_agent"
-
-		elif os.path.exists(bundle_dir + os.sep + "dcos-mesos-slave-public.service.log"):
-			node_obj.type = "pub_agent"
-
-		node_objs.append(node_obj)
-
-	elif bundle_type == "diag_bundle":
+	if bundle_type == "dcos_diag":
 		for node_dir in os.listdir(bundle_dir):
 			if not os.path.isdir(bundle_dir + os.sep + node_dir):
 				continue
@@ -147,6 +119,24 @@ def get_nodes(bundle_dir, bundle_type):
 				node_obj.type = "pub_agent"
 
 			node_objs.append(node_obj)
+
+	elif bundle_type == "dcos_oneliner":
+		node_obj = yabt.Node()
+
+		node_obj.dir = bundle_dir
+
+		node_obj.ip = "unknown"
+
+		if os.path.exists(bundle_dir + os.sep + "dcos-mesos-master.service.log"):
+			node_obj.type = "master"
+
+		elif os.path.exists(bundle_dir + os.sep + "dcos-mesos-slave.service.log"):
+			node_obj.type = "priv_agent"
+
+		elif os.path.exists(bundle_dir + os.sep + "dcos-mesos-slave-public.service.log"):
+			node_obj.type = "pub_agent"
+
+		node_objs.append(node_obj)
 
 
 	if len(node_objs) == 0:

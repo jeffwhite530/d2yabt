@@ -15,6 +15,9 @@ import shutil
 import json
 import re
 import signal
+import glob
+import zipfile
+import tarfile
 
 
 
@@ -83,6 +86,65 @@ def format_json(bundle_dir):
 
 
 
+def get_bundle_type(bundle):
+	"""Determine the type of bundle given and return a string of either:
+		* dcos_diag
+		* dcos_oneliner
+	"""
+
+	if os.path.isdir(bundle_name):
+		if glob.glob(bundle_name + os.sep + "*_master/dcos-mesos-master.service"):
+			return "dcos_diag"
+
+		if glob.glob(bundle_name + os.sep + "dcos-mesos-master.service.log"):
+			return "dcos_oneliner"
+
+		if glob.glob(bundle_name + os.sep + "dcos-mesos-slave*.service.log"):
+			return "dcos_oneliner"
+
+	elif os.path.isfile(bundle_name):
+		if bundle_name.endswith(".zip"):
+			myzip = zipfile.ZipFile(bundle_name)
+
+			for each in myzip.namelist():
+				if each.endswith("_master/dcos-mesos-master.service.gz"):
+					return "dcos_diag"
+
+		if bundle_name.endswith(".tgz"):
+			mytar = tarfile.open(bundle_name, "r:gz")
+
+			for each in mytar.getmembers():
+				if each.name.endswith("dcos-mesos-master.service.log"):
+					return "dcos_oneliner"
+
+				if each.name.endswith("dcos-mesos-slave.service.log"):
+					return "dcos_oneliner"
+
+				if each.name.endswith("dcos-mesos-slave-public.service.log"):
+					return "dcos_oneliner"
+
+	print("Unable to determine bundle type", file=sys.stderr)
+
+	sys.exit(1)
+
+
+
+def is_bundle_extracted(bundle_name):
+	"""Checks if the named bundle is already extracted.
+		If yes: return True
+		If no: return False
+	"""
+
+	bundle_dir = bundle_name[:-4]
+
+	if os.path.exists(bundle_dir):
+		return True
+
+	else:
+		return False
+
+
+
 if __name__ == "__main__":
 	# What options were we called with?
 	parser = argparse.ArgumentParser(description="Yet Another Bundle Tool: A tool used to analyze DC/OS diagnostic bundles")
@@ -126,30 +188,23 @@ if __name__ == "__main__":
 
 
 	# Decompress the bundle and the files within it
-	if bundle_name.endswith(".zip") or os.path.exists(bundle_name + os.sep + "summaryReport.txt"):
-		bundle_type = "diag_bundle"
+	bundle_type = get_bundle_type(bundle_name)
 
+	if os.path.isdir(bundle_name):
+		bundle_dir = bundle_name
+
+	elif is_bundle_extracted(bundle_name):
+		bundle_dir = bundle_name[:-4]
+
+		print("Bundle has already been extracted, using existing directory", bundle_dir)
+
+	elif bundle_type == "dcos_diag" and os.path.isfile(bundle_name):
 		bundle_dir = yabt.dcos.extract_bundle(bundle_name)
-
 		decompress_gzip_files(bundle_dir)
-
 		format_json(bundle_dir)
 
-	elif bundle_name.endswith(".tgz"):
-		bundle_type = "oneliner_bundle"
-
+	elif bundle_type == "dcos_oneliner" and os.path.isfile(bundle_name):
 		bundle_dir = yabt.dcos.extract_oneliner(bundle_name)
-
-	elif os.path.isdir(bundle_name) and os.path.exists(bundle_name + os.sep + "summaryReport.txt"):
-		bundle_dir = bundle_name
-		bundle_type = "diag_bundle"
-
-	elif os.path.isdir(bundle_name) and not os.path.exists(bundle_name + os.sep + "summaryReport.txt"):
-		bundle_dir = bundle_name
-		bundle_type = "oneliner_bundle"
-
-	else:
-		print("Unable to determine bundle type", file=sys.stderr)
 
 
 	# Create the node objects list
