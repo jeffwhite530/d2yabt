@@ -3,8 +3,8 @@
 
 
 import operator
-from yabt import check
-from yabt import dcos
+from yabt.dcos import bundle
+from yabt.dcos import check
 
 
 
