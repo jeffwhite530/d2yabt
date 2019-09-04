@@ -2,4 +2,5 @@
 lib/yabt/__pycache__/
 lib/yabt/dcos/__pycache__/
 lib/yabt/service/__pycache__/
+lib/yabt/konvoy/__pycache__/
 test-bundles/

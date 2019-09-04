@@ -102,6 +102,9 @@ def get_bundle_type(bundle_name):
 		if glob.glob(bundle_name + os.sep + "dcos_services.json"):
 			return "service_diag"
 
+		if os.path.exists(bundle_name + os.sep + "bundles"):
+			return "konvoy_diag"
+
 	elif os.path.isfile(bundle_name):
 		if bundle_name.endswith(".zip"):
 			myzip = zipfile.ZipFile(bundle_name)
@@ -126,7 +129,7 @@ def get_bundle_type(bundle_name):
 				if each.name.endswith("dcos-mesos-slave-public.service.log"):
 					return "dcos_oneliner"
 
-				if each.name.startswith("bundles/"):
+				if each.name.startswith("bundles"):
 					return "konvoy_diag"
 
 	print("Unable to determine bundle type", file=sys.stderr)
