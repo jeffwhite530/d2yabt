@@ -1,4 +1,5 @@
 *.swp
 lib/yabt/__pycache__/
 lib/yabt/dcos/__pycache__/
+lib/yabt/service/__pycache__/
 test-bundles/

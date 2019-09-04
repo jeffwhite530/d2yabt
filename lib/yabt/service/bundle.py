@@ -27,7 +27,7 @@ def extract(bundle_name):
 
 		bundle_name = bundle_name_base
 
-	bundle_dir = bundle_name[:-4]
+	bundle_dir = yabt.util.get_bundle_dir(bundle_name)
 
 	print("Extracting service bundle to", bundle_dir)
 

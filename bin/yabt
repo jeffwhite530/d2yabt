@@ -26,132 +26,6 @@ def trap_sigint(signal, frame):
 
 
 
-def decompress_gzip_files(start_dir):
-	"""Walk a directory tree and decompress all gzip files found.
-	"""
-	print("Expanding bundle files")
-
-	for root, dirs, files in os.walk(start_dir):
-		for each_file in files:
-			if not each_file.endswith(".gz"):
-				continue
-
-			file_with_path = root + os.sep + each_file
-
-			file_with_path_no_ext = file_with_path[:-3]
-
-			try:
-				with gzip.open(file_with_path, "rb") as f_in:
-					with open(file_with_path_no_ext, "wb") as f_out:
-						shutil.copyfileobj(f_in, f_out)
-
-			except EOFError:
-				print("Failed to expand", file_with_path, "EOF reached, incomplete file?")
-
-			except OSError:
-				print("Failed to expand", file_with_path + ", not a gzip file?")
-
-			else:
-				os.remove(file_with_path)
-
-
-
-def format_json(bundle_dir):
-	"""Format the JSON files into a human-readable form.
-	"""
-	print("Formatting JSON files")
-
-	for root, dirs, files in os.walk(bundle_dir):
-		for each_file in files:
-			if not each_file.endswith(".json"):
-				continue
-
-			# This file always fails to parse, just skip it
-			if each_file == "443-licensing_v1_audit_decrypt_1.json":
-				continue
-
-			file_with_path = root + os.sep + each_file
-
-			with open(file_with_path, "r+") as json_file_handle:
-				try:
-					json_data = json.load(json_file_handle)
-
-					json_file_handle.seek(0)
-
-					json_file_handle.write(json.dumps(json_data, indent=2, sort_keys=True))
-					json_file_handle.write("\n")
-
-				except (json.decoder.JSONDecodeError, UnicodeDecodeError):
-					print("Failed to parse JSON:", file_with_path, file=sys.stderr)
-
-
-
-def get_bundle_type(bundle):
-	"""Determine the type of bundle given and return a string of either:
-		* dcos_diag
-		* dcos_oneliner
-		* service_diag
-	"""
-
-	if os.path.isdir(bundle_name):
-		if glob.glob(bundle_name + os.sep + "*_master/dcos-mesos-master.service"):
-			return "dcos_diag"
-
-		if glob.glob(bundle_name + os.sep + "dcos-mesos-master.service.log"):
-			return "dcos_oneliner"
-
-		if glob.glob(bundle_name + os.sep + "dcos-mesos-slave*.service.log"):
-			return "dcos_oneliner"
-
-		if glob.glob(bundle_name + os.sep + "dcos_services.json"):
-			return "service_diag"
-
-	elif os.path.isfile(bundle_name):
-		if bundle_name.endswith(".zip"):
-			myzip = zipfile.ZipFile(bundle_name)
-
-			for each in myzip.namelist():
-				if each.endswith("_master/dcos-mesos-master.service.gz"):
-					return "dcos_diag"
-
-				if each.endswith("dcos_services.json"):
-					return "service_diag"
-
-		if bundle_name.endswith(".tgz"):
-			mytar = tarfile.open(bundle_name, "r:gz")
-
-			for each in mytar.getmembers():
-				if each.name.endswith("dcos-mesos-master.service.log"):
-					return "dcos_oneliner"
-
-				if each.name.endswith("dcos-mesos-slave.service.log"):
-					return "dcos_oneliner"
-
-				if each.name.endswith("dcos-mesos-slave-public.service.log"):
-					return "dcos_oneliner"
-
-	print("Unable to determine bundle type", file=sys.stderr)
-
-	sys.exit(1)
-
-
-
-def is_bundle_extracted(bundle_name):
-	"""Checks if the named bundle is already extracted.
-		If yes: return True
-		If no: return False
-	"""
-
-	bundle_dir = bundle_name[:-4]
-
-	if os.path.exists(bundle_dir):
-		return True
-
-	else:
-		return False
-
-
-
 if __name__ == "__main__":
 	# What options were we called with?
 	parser = argparse.ArgumentParser(description="Yet Another Bundle Tool: A tool used to analyze DC/OS diagnostic bundles")
@@ -192,20 +66,19 @@ if __name__ == "__main__":
 
 
 	# Decompress the bundle and the files within it
-	bundle_type = get_bundle_type(bundle_name)
+	bundle_type = yabt.util.get_bundle_type(bundle_name)
+	bundle_dir = yabt.util.get_bundle_dir(bundle_name)
 
 	if os.path.isdir(bundle_name):
-		bundle_dir = bundle_name
+		pass
 
-	elif is_bundle_extracted(bundle_name):
-		bundle_dir = bundle_name[:-4]
-
-		print("Bundle has already been extracted, using existing directory", bundle_dir)
+	elif yabt.util.is_bundle_extracted(bundle_name):
+		print("Bundle has already been extracted, using existing directory,", bundle_dir)
 
 	elif bundle_type == "dcos_diag":
 		bundle_dir = yabt.dcos.bundle.extract_diag(bundle_name)
-		decompress_gzip_files(bundle_dir)
-		format_json(bundle_dir)
+		yabt.util.decompress_gzip_files(bundle_dir)
+		yabt.util.format_json(bundle_dir)
 
 	elif bundle_type == "dcos_oneliner":
 		bundle_dir = yabt.dcos.bundle.extract_oneliner(bundle_name)
@@ -213,11 +86,18 @@ if __name__ == "__main__":
 	elif bundle_type == "service_diag":
 		bundle_dir = yabt.service.bundle.extract(bundle_name)
 
+	elif bundle_type == "konvoy_diag":
+		bundle_dir = yabt.konvoy.bundle.extract(bundle_name)
+
 
 	# Create the node objects list
 	if bundle_type == "dcos_diag" or bundle_type == "dcos_oneliner":
 		node_objs = yabt.dcos.bundle.get_nodes(bundle_dir, bundle_type)
 		yabt.dcos.bundle.print_nodes(node_objs)
+
+	elif bundle_type == "konvoy_diag":
+		node_objs = yabt.konvoy.bundle.get_nodes(bundle_dir)
+		yabt.konvoy.bundle.print_nodes(node_objs)
 
 
 	# Health checks
@@ -243,8 +123,12 @@ if __name__ == "__main__":
 		yabt.dcos.check.crdb_underrep_ranges(node_objs)
 		yabt.dcos.check.crdb_monotonicity_error(node_objs)
 		yabt.dcos.check.crdb_contact_error(node_objs)
+		# TODO: Check for private registry certificate errors
+		# TODO: Check for overlay master module in RECOVERING state events
 
-	# TODO: check_mesos_master()
-	# TODO: Check for private registry certificate errors
-	# TODO: Check for overlay master module in RECOVERING state events
+	if bundle_type == "service_diag":
+		pass
+
+	if bundle_type == "konvoy_diag":
+		pass
 

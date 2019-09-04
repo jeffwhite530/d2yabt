@@ -31,7 +31,7 @@ def extract_diag(bundle_name):
 
 		bundle_name = bundle_name_base
 
-	bundle_dir = bundle_name[:-4]
+	bundle_dir = yabt.util.get_bundle_dir(bundle_name)
 
 	print("Extracting DC/OS diagnostic bundle to", bundle_dir)
 
@@ -75,9 +75,7 @@ def extract_oneliner(bundle_name):
 
 		bundle_name = bundle_name_base
 
-	bundle_dir = bundle_name[:-4]
-
-	os.mkdir(bundle_dir)
+	bundle_dir = yabt.util.get_bundle_dir(bundle_name)
 
 	print("Extracting DC/OS oneliner bundle to", bundle_dir)
 
