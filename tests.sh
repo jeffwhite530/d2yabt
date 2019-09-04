@@ -93,8 +93,15 @@ cp ${test_bundles_dir}/dcos/diag/bundle-test-1-11-10.zip ${test_dir}/
 
 yabt ${test_dir}/bundle-test-1-11-10.zip >/dev/null
 
-[ -d bundle-test-1-11-10 ] || echo "Failure!"
-[ -f bundle-test-1-11-10.zip ] || echo "Failure!"
+if [ ! -d bundle-test-1-11-10 ];then
+	echo "Failure!"
+	exit 1
+fi
+
+if [ ! -f bundle-test-1-11-10.zip ];then
+	echo "Failure!"
+	exit 1
+fi
 
 
 echo "Testing a DC/OS oneliner bundle"
