@@ -3,15 +3,15 @@
 
 
 import operator
-from yabt import util
-from yabt.dcos import bundle
-from yabt.dcos import check
-from yabt.service import bundle
-from yabt.konvoy import bundle
+import yabt.util
+import yabt.dcos.bundle
+import yabt.dcos.check
+import yabt.service.bundle
+import yabt.konvoy.bundle
 
 
 
-class Node(object):
+class Node:
 	"""This class holds information about a DC/OS node.
 	"""
 	def __init__(self):
@@ -25,15 +25,11 @@ class Node(object):
 		self._oom_procs = dict()
 
 
-	def add_zk_fsync(self, zk_fsync):
+	def add_zk_fsync(self, zk_fsync: int):
 		"""Add an ZK fsync time entry.
 		"""
-		zk_fsync = int(zk_fsync)
-
 		self._zk_longest_fsyncs.append(zk_fsync)
-
 		self._zk_longest_fsyncs.sort(reverse=True)
-
 		self._zk_longest_fsyncs = self._zk_longest_fsyncs[:5]
 
 

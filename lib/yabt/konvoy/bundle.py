@@ -6,13 +6,12 @@
 
 
 
-import yabt
 import sys
 import os
-import shutil
 import re
-import pandas
 import tarfile
+import pandas
+import yabt
 
 
 
@@ -34,9 +33,7 @@ def extract(bundle_name):
 	print("Extracting DC/OS oneliner bundle to", bundle_dir)
 
 	tarfile_obj = tarfile.open(bundle_name, "r:gz")
-
 	tarfile_obj.extractall(bundle_dir)
-
 	tarfile_obj.close()
 
 	for root, dirs, files in os.walk(bundle_dir):
@@ -49,9 +46,7 @@ def extract(bundle_name):
 			file_with_path_no_ext = file_with_path[:-7]
 
 			tarfile_obj = tarfile.open(file_with_path, "r:gz")
-
 			tarfile_obj.extractall(file_with_path_no_ext)
-
 			tarfile_obj.close()
 
 	return bundle_dir
@@ -80,7 +75,7 @@ def get_nodes(bundle_dir):
 
 		node_objs.append(node_obj)
 	
-	if len(node_objs) == 0:
+	if not node_objs:
 		print("Failed to find any nodes in the bundle directory", file=sys.stderr)
 
 		sys.exit(1)
@@ -92,7 +87,7 @@ def get_nodes(bundle_dir):
 def print_nodes(node_objs):
 	"""Prints a table of nodes.
 	"""
-	node_table = pandas.DataFrame(data = {
+	node_table = pandas.DataFrame(data={
 			"IP": [o.ip for o in node_objs],
 			"Type": [o.type for o in node_objs]
 		}

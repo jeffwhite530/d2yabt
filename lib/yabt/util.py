@@ -6,15 +6,11 @@
 
 
 
-import yabt
 import sys
 import os
-import argparse
 import gzip
 import shutil
 import json
-import re
-import signal
 import glob
 import zipfile
 import tarfile
@@ -133,7 +129,6 @@ def get_bundle_type(bundle_name):
 					return "konvoy_diag"
 
 	print("Unable to determine bundle type", file=sys.stderr)
-
 	sys.exit(1)
 
 
@@ -144,16 +139,14 @@ def get_bundle_dir(bundle_name):
 	if os.path.isdir(bundle_name):
 		return bundle_name
 
-	elif bundle_name.endswith(".tgz") or bundle_name.endswith(".zip"):
+	if bundle_name.endswith(".tgz") or bundle_name.endswith(".zip"):
 		return bundle_name[:-4]
 
-	elif bundle_name.endswith(".tar.gz"):
+	if bundle_name.endswith(".tar.gz"):
 		return bundle_name[:-7]
 
-	else:
-		print("Unable to parse bundle name", file=sys.stderr)
-
-		sys.exit(1)
+	print("Unable to parse bundle name", file=sys.stderr)
+	sys.exit(1)
 
 
 
@@ -167,6 +160,5 @@ def is_bundle_extracted(bundle_name):
 	if os.path.exists(bundle_dir):
 		return True
 
-	else:
-		return False
+	return False
 

@@ -1,6 +1,4 @@
 #!/usr/bin/env python3
-"""This module contains all of the checks that yabt uses.
-"""
 
 
 
@@ -12,9 +10,9 @@ import sys
 import os
 import json
 import re
-import pandas
 import datetime
 import glob
+import pandas
 
 
 
@@ -58,9 +56,7 @@ def dcos_version(node_objs):
 		)
 
 		node_table.sort_values("DC/OS Version", inplace=True)
-
 		node_table.reset_index(inplace=True, drop=True)
-
 		node_table.index += 1
 
 		print(node_table)
@@ -98,9 +94,7 @@ def firewall_running(node_objs):
 		)
 
 		node_table.sort_values("Type", inplace=True)
-
 		node_table.reset_index(inplace=True, drop=True)
-
 		node_table.index += 1
 
 		print(node_table)
@@ -225,9 +219,7 @@ def check_time_failures(node_objs):
 		)
 
 		node_table.sort_values("check-time Failures", inplace=True, ascending=False)
-
 		node_table.reset_index(inplace=True, drop=True)
-
 		node_table.index += 1
 
 		print(node_table)
@@ -278,9 +270,7 @@ def kmem_presence(node_objs):
 		)
 
 		node_table.sort_values("kmem SLUB Errors", inplace=True, ascending=False)
-
 		node_table.reset_index(inplace=True, drop=True)
-
 		node_table.index += 1
 
 		print(node_table)
@@ -333,9 +323,7 @@ def zk_fsync(node_objs):
 		)
 
 		node_table.sort_values("ZK fsync Warnings", inplace=True, ascending=False)
-
 		node_table.reset_index(inplace=True, drop=True)
-
 		node_table.index += 1
 
 		print(node_table)
@@ -381,9 +369,7 @@ def zk_diskspace(node_objs):
 		)
 
 		node_table.sort_values("IP", inplace=True, ascending=False)
-
 		node_table.reset_index(inplace=True, drop=True)
-
 		node_table.index += 1
 
 		print(node_table)
@@ -439,9 +425,7 @@ def zk_connection_exception(node_objs):
 		)
 
 		node_table.sort_values("Count", inplace=True, ascending=False)
-
 		node_table.reset_index(inplace=True, drop=True)
-
 		node_table.index += 1
 
 		print(node_table)
@@ -492,9 +476,7 @@ def oom_presence(node_objs):
 		)
 
 		node_table.sort_values("oom-killer Invoked", inplace=True, ascending=False)
-
 		node_table.reset_index(inplace=True, drop=True)
-
 		node_table.index += 1
 
 		print(node_table)
@@ -540,9 +522,7 @@ def crdb_underrep_ranges(node_objs):
 		)
 
 		node_table.sort_values("IP", inplace=True, ascending=False)
-
 		node_table.reset_index(inplace=True, drop=True)
-
 		node_table.index += 1
 
 		print(node_table)
@@ -593,9 +573,7 @@ def crdb_monotonicity_error(node_objs):
 		)
 
 		node_table.sort_values("Errors", inplace=True, ascending=False)
-
 		node_table.reset_index(inplace=True, drop=True)
-
 		node_table.index += 1
 
 		print(node_table)
@@ -646,9 +624,7 @@ def crdb_contact_error(node_objs):
 		)
 
 		node_table.sort_values("Errors", inplace=True, ascending=False)
-
 		node_table.reset_index(inplace=True, drop=True)
-
 		node_table.index += 1
 
 		print(node_table)
@@ -907,7 +883,7 @@ def inactive_frameworks(node_objs):
 
 	print("Checking for inactive frameworks")
 
-	inactive_frameworks = list()
+	inactive_frameworks_list = list()
 
 	for node_obj in node_objs:
 		if not node_obj.type == "master":
@@ -927,19 +903,19 @@ def inactive_frameworks(node_objs):
 
 		for framework in json_data["frameworks"]:
 			if framework["active"] is False:
-				inactive_frameworks.append((framework["name"], framework["id"]))
+				inactive_frameworks_list.append((framework["name"], framework["id"]))
 
 		break
 
 	# Print the node table
-	if inactive_frameworks:
+	if inactive_frameworks_list:
 		print(ansi_red_fg + "ALERT: Found inactive frameworks" + ansi_end_color)
 
-		inactive_frameworks.sort(key=lambda tup: tup[0])
+		inactive_frameworks_list.sort(key=lambda tup: tup[0])
 
 		node_table = pandas.DataFrame(data={
-				"Name": [tup[0] for tup in inactive_frameworks],
-				"ID": [tup[1] for tup in inactive_frameworks],
+				"Name": [tup[0] for tup in inactive_frameworks_list],
+				"ID": [tup[1] for tup in inactive_frameworks_list],
 			}
 		)
 
@@ -988,9 +964,7 @@ def missing_dockerd(node_objs):
 		)
 
 		node_table.sort_values("IP", inplace=True)
-
 		node_table.reset_index(inplace=True, drop=True)
-
 		node_table.index += 1
 
 		print(node_table)
