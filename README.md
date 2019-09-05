@@ -4,6 +4,11 @@ yabt (Yet Another Bundle Tool) is used to analyze [DC/OS diagnostic bundles](htt
 2. Reads JSON and log files to find common problems and warns about them
 
 ### To run
+First, you'll need to install yabt's dependencies:
+```
+pip3 install pandas
+```
+
 Assuming yabt is in your home directory, you'll need to adjust PYTHONPATH so it can find the library like so:
 ```
 PYTHONPATH=$PYTHONPATH:~/yabt/lib ~/yabt/bin/yabt path/to/bundle.zip
