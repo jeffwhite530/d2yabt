@@ -17,6 +17,52 @@ import tarfile
 
 
 
+def untar(tar_file, output_dir):
+	"""Untar a gzipped tar file to a given directory.
+	"""
+	tarfile_obj = tarfile.open(tar_file, "r:gz")
+	tarfile_obj.extractall(output_dir)
+	tarfile_obj.close()
+
+
+
+def unzip(zip_file, output_dir):
+	"""Unzip a file to a given directory.
+	"""
+	os.mkdir(output_dir)
+
+	try:
+		zip_ref = zipfile.ZipFile(zip_file, "r")
+		zip_ref.extractall(output_dir)
+		zip_ref.close()
+
+	except zipfile.BadZipFile:
+		print("Failed to extract file, corrupt zip?  Attempting to extract with 7zip", file=sys.stderr)
+
+		zip7_command = shutil.which("7z")
+
+		if zip7_command is None:
+			print("7zip command (7z) not found.  Please install 7zip.", file=sys.stderr)
+
+			sys.exit(1)
+
+		zip7_process = subprocess.Popen([zip7_command, "x", "-o" + output_dir, "-y", zip_file], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+		zip7_process.wait()
+
+		# Note that we're not checking if 7zip was successful because it will exit non-zero even if it was able to partially extract the zip.
+
+	# If the extracted files are within a directory, move the contents of that directory up one
+	output_dir_contents = os.listdir(output_dir)
+
+	if len(output_dir_contents) == 1:
+		for each in os.listdir(output_dir + os.sep + output_dir_contents[0]):
+			os.rename(output_dir + os.sep + output_dir_contents[0] + os.sep + each, output_dir + os.sep + each)
+
+		os.rmdir(output_dir + os.sep + output_dir_contents[0])
+
+
+
 def decompress_gzip_files(start_dir):
 	"""Walk a directory tree and decompress all gzip files found.
 	"""
@@ -103,7 +149,7 @@ def get_bundle_type(bundle_name):
 
 	elif os.path.isfile(bundle_name):
 		if bundle_name.endswith(".zip"):
-			myzip = zipfile.ZipFile(bundle_name)
+			myzip = zipfile.ZipFile(bundle_name, "r")
 
 			for each in myzip.namelist():
 				if each.endswith("_master/dcos-mesos-master.service.gz"):

@@ -9,7 +9,6 @@
 import sys
 import os
 import re
-import tarfile
 import pandas
 import yabt
 
@@ -32,9 +31,7 @@ def extract(bundle_name):
 
 	print("Extracting DC/OS oneliner bundle to", bundle_dir)
 
-	tarfile_obj = tarfile.open(bundle_name, "r:gz")
-	tarfile_obj.extractall(bundle_dir)
-	tarfile_obj.close()
+	yabt.util.untar(bundle_name, bundle_dir)
 
 	for root, dirs, files in os.walk(bundle_dir):
 		for each_file in files:
@@ -45,9 +42,7 @@ def extract(bundle_name):
 
 			file_with_path_no_ext = file_with_path[:-7]
 
-			tarfile_obj = tarfile.open(file_with_path, "r:gz")
-			tarfile_obj.extractall(file_with_path_no_ext)
-			tarfile_obj.close()
+			yabt.util.untar(file_with_path, file_with_path_no_ext)
 
 	return bundle_dir
 
