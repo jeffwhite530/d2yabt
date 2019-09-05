@@ -7,7 +7,9 @@ import yabt.util
 import yabt.dcos.bundle
 import yabt.dcos.check
 import yabt.service.bundle
+import yabt.service.check
 import yabt.konvoy.bundle
+import yabt.konvoy.check
 
 
 
