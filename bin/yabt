@@ -23,10 +23,6 @@ if __name__ == "__main__":
 	# What options were we called with?
 	parser = argparse.ArgumentParser(description="Yet Another Bundle Tool: A tool used to analyze DC/OS diagnostic bundles")
 
-	parser.add_argument("-d", "--debug", dest="debug_mode",
-							default=False, action="store_true",
-							help="Enable debug mode")
-
 	parser.add_argument("bundle_name", metavar="bundle_name",
 							type=str, nargs="+",
 							help="The bundle file or directory")
