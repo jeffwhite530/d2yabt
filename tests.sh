@@ -38,7 +38,7 @@ echo "	Detect existing dir and examine ..."
 yabt service_diag.zip >/dev/null
 
 echo "	Use and existing dir and examine ..."
-#yabt service_diag >/dev/null
+yabt service_diag >/dev/null
 
 
 echo "Testing a DC/OS 1.13 diagnostic bundle"
