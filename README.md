@@ -12,16 +12,18 @@ PYTHONPATH=$PYTHONPATH:~/yabt/lib ~/yabt/bin/yabt
 ### To add checks
 
 yabt was designed to be easy to extended and have a simple to understand architecture.  Each supported bundle type is broken into its own namespace:
-
+```
 DC/OS --> yabt.dcos
 Service --> yabt.service
 Konvoy --> yabt.konvoy
+```
 
 Each of those has a "check" library where health checks are defined.  These map to the following files:
-
+```
 yabt.dcos.check --> lib/yabt/dcos/check.py
 yabt.service.check --> lib/yabt/service/check.py
 yabt.konvoy.check --> lib/yabt/konvoy/check.py
+```
 
 To add a check, add a function to the appropriate file.  Have that function do anything you want (search a log file, parse a JSON/YAML file, etc.).  Then simply add a call to that function in bin/yabt in the section labeled '# Health checks'.
 
