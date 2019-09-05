@@ -6,8 +6,10 @@ yabt (Yet Another Bundle Tool) is used to analyze [DC/OS diagnostic bundles](htt
 ### To run
 Assuming yabt is in your home directory, you'll need to adjust PYTHONPATH so it can find the library like so:
 ```
-PYTHONPATH=$PYTHONPATH:~/yabt/lib ~/yabt/bin/yabt
+PYTHONPATH=$PYTHONPATH:~/yabt/lib ~/yabt/bin/yabt path/to/bundle.zip
 ```
+
+yabt will extract the bundle to the current working directory and move the bundle file to the current directory as well.  It then runs through the health checks available for that specific bundle type.
 
 ### To add checks
 
