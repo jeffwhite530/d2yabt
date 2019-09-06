@@ -528,7 +528,6 @@ def crdb_underrep_ranges(node_objs):
 def crdb_monotonicity_error(node_objs):
 	"""Check for time sync errors in CRDB
 	"""
-
 	print("Checking for time sync errors in CRDB")
 
 	crdb_timesync_nodes = list()
@@ -579,7 +578,6 @@ def crdb_monotonicity_error(node_objs):
 def crdb_contact_error(node_objs):
 	"""Check for CRDB being unable to connect to other instances
 	"""
-
 	print("Checking for instance communication errors in CRDB")
 
 	crdb_contact_error_nodes = list()
@@ -630,7 +628,6 @@ def crdb_contact_error(node_objs):
 def state_size(node_objs):
 	"""Check the size of Mesos' state.json and warn if it is large.
 	"""
-
 	print("Checking for large state.json")
 
 	for node_obj in node_objs:
@@ -650,7 +647,6 @@ def state_size(node_objs):
 def mesos_leader_changes(node_objs):
 	"""Search for Mesos leader changes.
 	"""
-
 	print("Checking for Mesos leader changes")
 
 	leader_changes = list()
@@ -707,7 +703,6 @@ def mesos_leader_changes(node_objs):
 def zk_leader_changes(node_objs):
 	"""Search for ZooKeeper leader changes.
 	"""
-
 	print("Checking for ZooKeeper leader changes")
 
 	leader_changes = list()
@@ -763,7 +758,6 @@ def zk_leader_changes(node_objs):
 def marathon_leader_changes(node_objs):
 	"""Search for Marathon leader changes.
 	"""
-
 	print("Checking for Marathon leader changes")
 
 	leader_changes = list()
@@ -876,7 +870,6 @@ def unreachable_agents_mesos_state(node_objs):
 def inactive_frameworks(node_objs):
 	"""Check for and list any inactive frameworks.
 	"""
-
 	print("Checking for inactive frameworks")
 
 	inactive_frameworks_list = list()
@@ -924,7 +917,6 @@ def inactive_frameworks(node_objs):
 def missing_dockerd(node_objs):
 	"""Check for agents which do not have a running Docker daemon
 	"""
-
 	print("Checking for missing Docker daemon on agents")
 
 	agents_missing_dockerd = list()

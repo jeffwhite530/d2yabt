@@ -4,7 +4,6 @@
 
 import sys
 import os
-import shutil
 import pandas
 import yabt
 
@@ -13,16 +12,7 @@ import yabt
 def extract_diag(bundle_name):
 	"""Expand the DC/OS bundle into a directory.
 	"""
-
-	bundle_name_base = os.path.basename(bundle_name)
-
-	if not bundle_name == bundle_name_base:
-		os.rename(bundle_name, bundle_name_base)
-
-		print("Moved", bundle_name_base, "to the current working directory")
-
-		bundle_name = bundle_name_base
-
+	bundle_name = yabt.util.relocate_bundle(bundle_name)
 	bundle_dir = yabt.util.get_bundle_dir(bundle_name)
 
 	print("Extracting DC/OS diagnostic bundle to", bundle_dir)
@@ -36,16 +26,7 @@ def extract_diag(bundle_name):
 def extract_oneliner(bundle_name):
 	"""Expand the oneliner bundle into a directory.
 	"""
-
-	bundle_name_base = os.path.basename(bundle_name)
-
-	if not bundle_name == bundle_name_base:
-		os.rename(bundle_name, bundle_name_base)
-
-		print("Moved", bundle_name_base, "to the current working directory")
-
-		bundle_name = bundle_name_base
-
+	bundle_name = yabt.util.relocate_bundle(bundle_name)
 	bundle_dir = yabt.util.get_bundle_dir(bundle_name)
 
 	print("Extracting DC/OS oneliner bundle to", bundle_dir)

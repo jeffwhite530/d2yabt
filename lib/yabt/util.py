@@ -221,3 +221,21 @@ def is_bundle_extracted(bundle_name):
 
 	return False
 
+
+
+def relocate_bundle(bundle_name):
+	"""Moves the bundle file to the current working directory if it isn't already there.
+		Returns the new bundle name without path.
+	"""
+
+	bundle_name_base = os.path.basename(bundle_name)
+
+	if not bundle_name == bundle_name_base:
+		os.rename(bundle_name, bundle_name_base)
+
+		print("Moved", bundle_name_base, "to the current working directory")
+
+		return bundle_name_base
+
+	return bundle_name
+

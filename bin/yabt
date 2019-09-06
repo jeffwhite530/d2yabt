@@ -10,7 +10,7 @@ import yabt
 
 
 
-def trap_sigint(signal, frame):
+def trap_sigint(signal_received, frame):
 	sys.exit(0)
 
 
@@ -29,7 +29,7 @@ if __name__ == "__main__":
 	yabt_args = parser.parse_args()
 
 
-	# Trap CTRL+C (SIGINT)
+	# Trap CTRL+C (SIGINT) so we exit rather than printing a trace
 	signal.signal(signal.SIGINT, trap_sigint)
 
 

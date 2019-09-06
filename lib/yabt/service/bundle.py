@@ -4,7 +4,6 @@
 
 import sys
 import os
-import shutil
 import yabt
 
 
@@ -12,16 +11,7 @@ import yabt
 def extract(bundle_name):
 	"""Expand the service bundle into a directory.
 	"""
-
-	bundle_name_base = os.path.basename(bundle_name)
-
-	if not bundle_name == bundle_name_base:
-		os.rename(bundle_name, bundle_name_base)
-
-		print("Moved", bundle_name_base, "to the current working directory")
-
-		bundle_name = bundle_name_base
-
+	bundle_name = yabt.util.relocate_bundle(bundle_name)
 	bundle_dir = yabt.util.get_bundle_dir(bundle_name)
 
 	print("Extracting service bundle to", bundle_dir)
