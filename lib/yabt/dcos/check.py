@@ -2,10 +2,6 @@
 
 
 
-# pylint: disable=line-too-long
-
-
-
 import sys
 import os
 import json

@@ -2,10 +2,6 @@
 
 
 
-# pylint: disable=line-too-long
-
-
-
 import sys
 import os
 import gzip
@@ -153,7 +149,7 @@ def get_bundle_type(bundle_name):
 
 	elif bundle_name.endswith(".tgz") or bundle_name.endswith(".tar.gz"):
 		mytar = tarfile.open(bundle_name, "r:gz")
-		
+
 		for each_entry in mytar.getnames():
 			for each in os.path.split(each_entry):
 				bundle_contents.append(each)
@@ -176,7 +172,7 @@ def get_bundle_type(bundle_name):
 				sys.exit(1)
 
 			zip7_process = subprocess.Popen([zip7_command, "-ba", "l", bundle_name], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-				
+
 			for line in zip7_process.stdout:
 				line = line.decode("UTF-8").rstrip()
 
