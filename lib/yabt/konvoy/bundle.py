@@ -29,7 +29,7 @@ def extract(bundle_name):
 
 	bundle_dir = yabt.util.get_bundle_dir(bundle_name)
 
-	print("Extracting DC/OS oneliner bundle to", bundle_dir)
+	print("Extracting Konvoy bundle to", bundle_dir)
 
 	yabt.util.untar(bundle_name, bundle_dir)
 

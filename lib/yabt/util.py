@@ -131,71 +131,65 @@ def get_bundle_type(bundle_name):
 		* konvoy_diag
 	"""
 
+	bundle_file_types = {
+		"dcos-mesos-master.service": "dcos_diag",
+		"dcos-mesos-master.service.gz": "dcos_diag",
+		"dcos-mesos-master.service.log": "dcos_oneliner",
+		"dcos-mesos-slave.service.log": "dcos_oneliner",
+		"dcos-mesos-slave-public.service.log": "dcos_oneliner",
+		"dcos_services.json": "service_diag",
+		"bundles": "konvoy_diag"
+	}
+
+	bundle_contents = list()
+
 	if os.path.isdir(bundle_name):
-		if glob.glob(bundle_name + os.sep + "*_master/dcos-mesos-master.service"):
-			return "dcos_diag"
+		for root, dirs, files in os.walk(bundle_name):
+			for each_file in files:
+				bundle_contents.append(each_file)
 
-		if glob.glob(bundle_name + os.sep + "dcos-mesos-master.service.log"):
-			return "dcos_oneliner"
+			for each_dir in dirs:
+				bundle_contents.append(each_dir)
 
-		if glob.glob(bundle_name + os.sep + "dcos-mesos-slave*.service.log"):
-			return "dcos_oneliner"
+	elif bundle_name.endswith(".tgz") or bundle_name.endswith(".tar.gz"):
+		mytar = tarfile.open(bundle_name, "r:gz")
+		
+		for each_entry in mytar.getnames():
+			for each in os.path.split(each_entry):
+				bundle_contents.append(each)
 
-		if glob.glob(bundle_name + os.sep + "dcos_services.json"):
-			return "service_diag"
+	elif bundle_name.endswith(".zip"):
+		try:
+			myzip = zipfile.ZipFile(bundle_name, "r")
 
-		if os.path.exists(bundle_name + os.sep + "bundles"):
-			return "konvoy_diag"
+			for each_entry in myzip.namelist():
+				for each in os.path.split(each_entry):
+					bundle_contents.append(each)
 
-	elif os.path.isfile(bundle_name):
-		if bundle_name.endswith(".zip"):
-			try:
-				myzip = zipfile.ZipFile(bundle_name, "r")
+		except zipfile.BadZipFile:
+			print("Failed to extract file, corrupt zip?  Attempting to list files with 7zip", file=sys.stderr)
 
-				for each in myzip.namelist():
-					if each.endswith("_master/dcos-mesos-master.service.gz"):
-						return "dcos_diag"
+			zip7_command = shutil.which("7z")
 
-					if each.endswith("dcos_services.json"):
-						return "service_diag"
+			if zip7_command is None:
+				print("7zip command (7z) not found.  Please install 7zip.", file=sys.stderr)
+				sys.exit(1)
 
-			except zipfile.BadZipFile:
-				pass
-
-				print("Failed to extract file, corrupt zip?  Attempting to list files with 7zip", file=sys.stderr)
-
-				zip7_command = shutil.which("7z")
-
-				if zip7_command is None:
-					print("7zip command (7z) not found.  Please install 7zip.", file=sys.stderr)
-					sys.exit(1)
-
-				zip7_process = subprocess.Popen([zip7_command, "l", bundle_name], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+			zip7_process = subprocess.Popen([zip7_command, "-ba", "l", bundle_name], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 				
-				for line in zip7_process.stdout:
-					line = line.decode("UTF-8")
+			for line in zip7_process.stdout:
+				line = line.decode("UTF-8").rstrip()
 
-					if line.rstrip().endswith("_master/dcos-mesos-master.service.gz"):
-						return "dcos_diag"
+				each_entry = line.split()[-1]
 
-					if line.rstrip().endswith("dcos_services.json"):
-						return "service_diag"
+				for each in os.path.split(each_entry):
+					bundle_contents.append(each)
 
-		if bundle_name.endswith(".tgz") or bundle_name.endswith(".tar.gz"):
-			mytar = tarfile.open(bundle_name, "r:gz")
 
-			for each in mytar.getmembers():
-				if each.name.endswith("dcos-mesos-master.service.log"):
-					return "dcos_oneliner"
+	for bundle_content in bundle_contents:
+		if bundle_content in bundle_file_types:
+			return bundle_file_types[bundle_content]
 
-				if each.name.endswith("dcos-mesos-slave.service.log"):
-					return "dcos_oneliner"
-
-				if each.name.endswith("dcos-mesos-slave-public.service.log"):
-					return "dcos_oneliner"
-
-				if each.name.startswith("bundles"):
-					return "konvoy_diag"
 
 	print("Unable to determine bundle type", file=sys.stderr)
 	sys.exit(1)
