@@ -104,6 +104,13 @@ if [ ! -f bundle-test-1-11-10.zip ];then
 fi
 
 
+echo "Testing a DC/OS diagnostic bundle with a corrupt zip"
+
+cp ${test_bundles_dir}/dcos/diag/bundle-corrupt-zip.zip .
+
+yabt bundle-corrupt-zip.zip >/dev/null
+
+
 echo "Testing a DC/OS oneliner bundle"
 
 cp ${test_bundles_dir}/dcos/oneliner/bundle-oneliner.tgz .

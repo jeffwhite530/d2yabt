@@ -9,7 +9,6 @@
 import sys
 import os
 import shutil
-import subprocess
 import pandas
 import yabt
 

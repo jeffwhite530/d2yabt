@@ -14,6 +14,7 @@ import json
 import glob
 import zipfile
 import tarfile
+import subprocess
 
 
 
@@ -43,7 +44,6 @@ def unzip(zip_file, output_dir):
 
 		if zip7_command is None:
 			print("7zip command (7z) not found.  Please install 7zip.", file=sys.stderr)
-
 			sys.exit(1)
 
 		zip7_process = subprocess.Popen([zip7_command, "x", "-o" + output_dir, "-y", zip_file], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -149,14 +149,37 @@ def get_bundle_type(bundle_name):
 
 	elif os.path.isfile(bundle_name):
 		if bundle_name.endswith(".zip"):
-			myzip = zipfile.ZipFile(bundle_name, "r")
+			try:
+				myzip = zipfile.ZipFile(bundle_name, "r")
 
-			for each in myzip.namelist():
-				if each.endswith("_master/dcos-mesos-master.service.gz"):
-					return "dcos_diag"
+				for each in myzip.namelist():
+					if each.endswith("_master/dcos-mesos-master.service.gz"):
+						return "dcos_diag"
 
-				if each.endswith("dcos_services.json"):
-					return "service_diag"
+					if each.endswith("dcos_services.json"):
+						return "service_diag"
+
+			except zipfile.BadZipFile:
+				pass
+
+				print("Failed to extract file, corrupt zip?  Attempting to list files with 7zip", file=sys.stderr)
+
+				zip7_command = shutil.which("7z")
+
+				if zip7_command is None:
+					print("7zip command (7z) not found.  Please install 7zip.", file=sys.stderr)
+					sys.exit(1)
+
+				zip7_process = subprocess.Popen([zip7_command, "l", bundle_name], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+				
+				for line in zip7_process.stdout:
+					line = line.decode("UTF-8")
+
+					if line.rstrip().endswith("_master/dcos-mesos-master.service.gz"):
+						return "dcos_diag"
+
+					if line.rstrip().endswith("dcos_services.json"):
+						return "service_diag"
 
 		if bundle_name.endswith(".tgz") or bundle_name.endswith(".tar.gz"):
 			mytar = tarfile.open(bundle_name, "r:gz")
