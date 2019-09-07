@@ -14,7 +14,11 @@ Assuming yabt is in your home directory, you'll need to adjust PYTHONPATH so it 
 PYTHONPATH=$PYTHONPATH:~/yabt/lib ~/yabt/bin/yabt path/to/bundle.zip
 ```
 
-yabt will extract the bundle to the current working directory and move the bundle file to the current directory as well.  It then runs through the health checks available for that specific bundle type.
+yabt will extract the bundle to the current working directory and move the bundle file to the current directory as well.  It then runs through the health checks available for that specific bundle type.  You can also run yabt with no argument to use the current directory as the bundle:
+```
+cd path/to/bundle
+PYTHONPATH=$PYTHONPATH:~/yabt/lib ~/yabt/bin/yabt
+```
 
 ### To add checks
 
