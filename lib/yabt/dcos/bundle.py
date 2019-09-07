@@ -53,16 +53,15 @@ def get_nodes(bundle_dir, bundle_type):
 			node_obj.dir = bundle_dir + os.sep + node_dir
 
 			if node_dir.endswith("_master"):
-				node_obj.ip = node_dir[:-7]
 				node_obj.type = "master"
 
 			elif node_dir.endswith("_agent"):
-				node_obj.ip = node_dir[:-6]
 				node_obj.type = "priv_agent"
 
 			elif node_dir.endswith("_agent_public"):
-				node_obj.ip = node_dir[:-13]
 				node_obj.type = "pub_agent"
+
+			node_obj.ip = node_dir.split("_")[0]
 
 			node_objs.append(node_obj)
 
@@ -70,7 +69,6 @@ def get_nodes(bundle_dir, bundle_type):
 		node_obj = yabt.Node()
 
 		node_obj.dir = bundle_dir
-
 		node_obj.ip = "unknown"
 
 		if os.path.exists(bundle_dir + os.sep + "dcos-mesos-master.service.log"):
@@ -87,7 +85,6 @@ def get_nodes(bundle_dir, bundle_type):
 
 	if not node_objs:
 		print("Failed to find any nodes in the bundle directory", file=sys.stderr)
-
 		sys.exit(1)
 
 	return node_objs
