@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+"""This file contains the functions which are performed on a Konvoy bundle.
+"""
 
 
 
@@ -20,7 +22,7 @@ def extract(bundle_name):
 
 	yabt.util.untar(bundle_name, bundle_dir)
 
-	for root, dirs, files in os.walk(bundle_dir):
+	for root, _dirs, files in os.walk(bundle_dir):
 		for each_file in files:
 			if not each_file.endswith(".tar.gz"):
 				continue
@@ -56,7 +58,7 @@ def get_nodes(bundle_dir):
 		node_obj.type = "Konvoy kubelet"
 
 		node_objs.append(node_obj)
-	
+
 	if not node_objs:
 		print("Failed to find any nodes in the bundle directory", file=sys.stderr)
 

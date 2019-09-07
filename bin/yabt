@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
-
+"""This is the main file of yabt.  In order to use it, just run it with
+PYTHONPATH set to include the location of yabt's library.
+"""
 
 
 import sys
@@ -10,7 +12,9 @@ import yabt
 
 
 
-def trap_sigint(signal_received, frame):
+def trap_sigint(_signal_received, _frame):
+	"""Instead of crashing and printing a trace, exit cleanly on CRTL+C.
+	"""
 	sys.exit(130)
 
 

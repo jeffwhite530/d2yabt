@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
+"""This file contains the functions which are performed on a service bundle.
+"""
 
 
 
-import sys
-import os
 import yabt
 
 

@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+"""This file contains the health check functions used on a DC/OS bundle.
+"""
 
 
 
@@ -13,8 +15,8 @@ import pandas
 
 
 pandas.options.display.max_colwidth = 200
-ansi_red_fg = "\033[31m"
-ansi_end_color = "\033[0m"
+ANSI_RED_FG = "\033[31m"
+ANSI_END_FORMAT = "\033[0m"
 
 
 def dcos_version(node_objs):
@@ -41,8 +43,8 @@ def dcos_version(node_objs):
 	dcos_versions_set = set(dcos_versions_list)
 
 	# Print the node table
-	if not len(dcos_versions_set) == 1:
-		print(ansi_red_fg + "ALERT: Non-matching DC/OS versions found" + ansi_end_color)
+	if len(dcos_versions_set) != 1:
+		print(ANSI_RED_FG + "ALERT: Non-matching DC/OS versions found" + ANSI_END_FORMAT)
 
 		node_table = pandas.DataFrame(data={
 				"IP": [o.ip for o in node_objs],
@@ -81,7 +83,7 @@ def firewall_running(node_objs):
 
 	# Print the node table
 	if nodes_with_firewalld:
-		print(ansi_red_fg + "ALERT: Agents with firewalld running found" + ansi_end_color)
+		print(ANSI_RED_FG + "ALERT: Agents with firewalld running found" + ANSI_END_FORMAT)
 
 		node_table = pandas.DataFrame(data={
 				"IP": [o.ip for o in nodes_with_firewalld],
@@ -137,7 +139,7 @@ def unreachable_agents_mesos_log(node_objs):
 
 	# Print the node table
 	if unreachable_nodes:
-		print(ansi_red_fg + "ALERT: Unreachable agents found in the Mesos master log" + ansi_end_color)
+		print(ANSI_RED_FG + "ALERT: Unreachable agents found in the Mesos master log" + ANSI_END_FORMAT)
 
 		unreachable_nodes.sort(key=lambda tup: tup[0])
 
@@ -162,7 +164,7 @@ def unreachable_agents_mesos_log(node_objs):
 
 	# Print the node table
 	if missing_nodes_from_bundle:
-		print(ansi_red_fg + "ALERT: Agents found in Mesos master log but not in the bundle" + ansi_end_color)
+		print(ANSI_RED_FG + "ALERT: Agents found in Mesos master log but not in the bundle" + ANSI_END_FORMAT)
 
 		node_table = pandas.DataFrame(data={
 				"Agent": missing_nodes_from_bundle,
@@ -205,7 +207,7 @@ def check_time_failures(node_objs):
 
 	# Print the node table
 	if check_time_error_nodes:
-		print(ansi_red_fg + "ALERT: Found nodes with check-time failures" + ansi_end_color)
+		print(ANSI_RED_FG + "ALERT: Found nodes with check-time failures" + ANSI_END_FORMAT)
 
 		node_table = pandas.DataFrame(data={
 				"IP": [tup[0].ip for tup in check_time_error_nodes],
@@ -256,7 +258,7 @@ def kmem_presence(node_objs):
 
 	# Print the node table
 	if kmem_error_nodes:
-		print(ansi_red_fg + "ALERT: Agents with kmem SLUB errors found" + ansi_end_color)
+		print(ANSI_RED_FG + "ALERT: Agents with kmem SLUB errors found" + ANSI_END_FORMAT)
 
 		node_table = pandas.DataFrame(data={
 				"IP": [tup[0].ip for tup in kmem_error_nodes],
@@ -309,7 +311,7 @@ def zk_fsync(node_objs):
 
 	# Print the node table
 	if zk_fsync_node_objs:
-		print(ansi_red_fg + "ALERT: ZooKeeper slow fsync found" + ansi_end_color)
+		print(ANSI_RED_FG + "ALERT: ZooKeeper slow fsync found" + ANSI_END_FORMAT)
 
 		node_table = pandas.DataFrame(data={
 				"IP": [o.ip for o in zk_fsync_node_objs],
@@ -357,7 +359,7 @@ def zk_diskspace(node_objs):
 
 	# Print the node table
 	if zk_diskspace_nodes:
-		print(ansi_red_fg + "ALERT: ZooKeeper disk space error found" + ansi_end_color)
+		print(ANSI_RED_FG + "ALERT: ZooKeeper disk space error found" + ANSI_END_FORMAT)
 
 		node_table = pandas.DataFrame(data={
 				"IP": zk_diskspace_nodes,
@@ -412,11 +414,11 @@ def zk_connection_exception(node_objs):
 
 	# Print the node table
 	if zk_connection_exceptions:
-		print(ansi_red_fg + "ALERT: ZooKeeper connection exceptions found" + ansi_end_color)
+		print(ANSI_RED_FG + "ALERT: ZooKeeper connection exceptions found" + ANSI_END_FORMAT)
 
 		node_table = pandas.DataFrame(data={
 				"Connection": list(zk_connection_exceptions.keys()),
-				"Count": [zk_connection_exceptions[connection] for connection in zk_connection_exceptions.keys()]
+				"Count": [zk_connection_exceptions[connection] for connection in zk_connection_exceptions]
 			}
 		)
 
@@ -461,7 +463,7 @@ def oom_presence(node_objs):
 
 	# Print the node table
 	if oom_node_objs:
-		print(ansi_red_fg + "ALERT: Instances of oom-killer found" + ansi_end_color)
+		print(ANSI_RED_FG + "ALERT: Instances of oom-killer found" + ANSI_END_FORMAT)
 
 		node_table = pandas.DataFrame(data={
 				"IP": [o.ip for o in oom_node_objs],
@@ -502,7 +504,7 @@ def crdb_underrep_ranges(node_objs):
 		with open(poststart_log, "r") as poststart_file:
 			for each_line in poststart_file:
 				each_line = each_line.rstrip("\n")
-			
+
 				if re.search("CockroachDB has underreplicated ranges", each_line) is not None:
 					underrep_ranges_nodes.append(node_obj.ip)
 
@@ -510,7 +512,7 @@ def crdb_underrep_ranges(node_objs):
 
 	# Print the node table
 	if underrep_ranges_nodes:
-		print(ansi_red_fg + "ALERT: Nodes with under-replicated ranges in CRDB found" + ansi_end_color)
+		print(ANSI_RED_FG + "ALERT: Nodes with under-replicated ranges in CRDB found" + ANSI_END_FORMAT)
 
 		node_table = pandas.DataFrame(data={
 				"IP": underrep_ranges_nodes,
@@ -559,7 +561,7 @@ def crdb_monotonicity_error(node_objs):
 
 	# Print the node table
 	if crdb_timesync_nodes:
-		print(ansi_red_fg + "ALERT: Nodes with time sync errors in CRDB found" + ansi_end_color)
+		print(ANSI_RED_FG + "ALERT: Nodes with time sync errors in CRDB found" + ANSI_END_FORMAT)
 
 		node_table = pandas.DataFrame(data={
 				"IP": [tup[0].ip for tup in crdb_timesync_nodes],
@@ -609,7 +611,7 @@ def crdb_contact_error(node_objs):
 
 	# Print the node table
 	if crdb_contact_error_nodes:
-		print(ansi_red_fg + "ALERT: Nodes with instance communication errors in CRDB found" + ansi_end_color)
+		print(ANSI_RED_FG + "ALERT: Nodes with instance communication errors in CRDB found" + ANSI_END_FORMAT)
 
 		node_table = pandas.DataFrame(data={
 				"IP": [tup[0].ip for tup in crdb_contact_error_nodes],
@@ -638,7 +640,7 @@ def state_size(node_objs):
 			state_size_bytes = os.stat(node_obj.dir + os.sep + "5050-master_state.json").st_size
 
 			if state_size_bytes > 5242880:
-				print(ansi_red_fg + "ALERT: Mesos state.json is larger than 5MB (" + str(round(state_size_bytes / 1024 / 1024, 2)) + " MB)" + ansi_end_color)
+				print(ANSI_RED_FG + "ALERT: Mesos state.json is larger than 5MB (" + str(round(state_size_bytes / 1024 / 1024, 2)) + " MB)" + ANSI_END_FORMAT)
 
 			break
 
@@ -684,7 +686,7 @@ def mesos_leader_changes(node_objs):
 
 	# Print the node table
 	if leader_changes:
-		print(ansi_red_fg + "ALERT: Mesos leader changes found" + ansi_end_color)
+		print(ANSI_RED_FG + "ALERT: Mesos leader changes found" + ANSI_END_FORMAT)
 
 		leader_changes.sort(key=lambda tup: tup[0])
 
@@ -739,7 +741,7 @@ def zk_leader_changes(node_objs):
 
 	# Print the node table
 	if leader_changes:
-		print(ansi_red_fg + "ALERT: ZooKeeper leader changes found" + ansi_end_color)
+		print(ANSI_RED_FG + "ALERT: ZooKeeper leader changes found" + ANSI_END_FORMAT)
 
 		leader_changes.sort(key=lambda tup: tup[0])
 
@@ -795,7 +797,7 @@ def marathon_leader_changes(node_objs):
 
 	# Print the node table
 	if leader_changes:
-		print(ansi_red_fg + "ALERT: Marathon leader changes found" + ansi_end_color)
+		print(ANSI_RED_FG + "ALERT: Marathon leader changes found" + ANSI_END_FORMAT)
 
 		leader_changes.sort(key=lambda tup: tup[0])
 
@@ -851,7 +853,7 @@ def unreachable_agents_mesos_state(node_objs):
 
 	# Print the node table
 	if unreachable_agents:
-		print(ansi_red_fg + "ALERT: Unreachable agents found in Mesos state" + ansi_end_color)
+		print(ANSI_RED_FG + "ALERT: Unreachable agents found in Mesos state" + ANSI_END_FORMAT)
 
 		unreachable_agents.sort(key=lambda tup: tup[0])
 
@@ -898,7 +900,7 @@ def inactive_frameworks(node_objs):
 
 	# Print the node table
 	if inactive_frameworks_list:
-		print(ansi_red_fg + "ALERT: Found inactive frameworks" + ansi_end_color)
+		print(ANSI_RED_FG + "ALERT: Found inactive frameworks" + ANSI_END_FORMAT)
 
 		inactive_frameworks_list.sort(key=lambda tup: tup[0])
 
@@ -944,7 +946,7 @@ def missing_dockerd(node_objs):
 
 	# Print the node table
 	if agents_missing_dockerd:
-		print(ansi_red_fg + "ALERT: Found agents with Docker daemon not running" + ansi_end_color)
+		print(ANSI_RED_FG + "ALERT: Found agents with Docker daemon not running" + ANSI_END_FORMAT)
 
 		node_table = pandas.DataFrame(data={
 				"IP": agents_missing_dockerd,

@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+"""This file contains useful functions that can be used elsewhere in yabt.
+"""
 
 
 
@@ -7,7 +9,6 @@ import os
 import gzip
 import shutil
 import json
-import glob
 import zipfile
 import tarfile
 import subprocess
@@ -64,7 +65,7 @@ def decompress_gzip_files(start_dir):
 	"""
 	print("Expanding bundle files")
 
-	for root, dirs, files in os.walk(start_dir):
+	for root, _dirs, files in os.walk(start_dir):
 		for each_file in files:
 			if not each_file.endswith(".gz"):
 				continue
@@ -94,7 +95,7 @@ def format_json(bundle_dir):
 	"""
 	print("Formatting JSON files")
 
-	for root, dirs, files in os.walk(bundle_dir):
+	for root, _dirs, files in os.walk(bundle_dir):
 		for each_file in files:
 			if not each_file.endswith(".json"):
 				continue
@@ -140,7 +141,7 @@ def get_bundle_type(bundle_name):
 	bundle_contents = list()
 
 	if os.path.isdir(bundle_name):
-		for root, dirs, files in os.walk(bundle_name):
+		for _root, dirs, files in os.walk(bundle_name):
 			for each_file in files:
 				bundle_contents.append(each_file)
 

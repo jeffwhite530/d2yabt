@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+"""This file loads the other library files of yabt.  It also defines
+any classes provided by yabt.
+"""
 
 
 
@@ -14,7 +17,7 @@ import yabt.konvoy.check
 
 
 class Node:
-	"""This class holds information about a DC/OS node.
+	"""This class holds information about a DC/OS or Konvoy node.
 	"""
 	def __init__(self):
 		self.ip = ""
