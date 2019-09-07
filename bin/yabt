@@ -11,7 +11,7 @@ import yabt
 
 
 def trap_sigint(signal_received, frame):
-	sys.exit(0)
+	sys.exit(130)
 
 
 
@@ -20,7 +20,7 @@ if __name__ == "__main__":
 	parser = argparse.ArgumentParser(description="Yet Another Bundle Tool: A tool used to analyze DC/OS diagnostic bundles")
 
 	parser.add_argument("bundle_name", metavar="bundle_name",
-							type=str, nargs="+",
+							type=str, nargs="?",
 							help="The bundle file or directory")
 
 	# TODO: Add option to only look at a specific node
@@ -33,19 +33,16 @@ if __name__ == "__main__":
 	signal.signal(signal.SIGINT, trap_sigint)
 
 
-	# Verify we have a bundle arg
-	if not len(yabt_args.bundle_name) == 1:
-		print("Invalid number of bundle names passed, shell quoting problem?", file=sys.stderr)
-		sys.exit(1)
+	# If we were not given a bundle arg, assume we're in an extracted bundle
+	if yabt_args.bundle_name:
+		bundle_name = yabt_args.bundle_name
+
+		if not os.path.exists(bundle_name):
+			print("No such bundle found:", bundle_name, file=sys.stderr)
+			sys.exit(1)
 
 	else:
-		bundle_name = yabt_args.bundle_name[0]
-
-
-	# Does the named bundle exist?
-	if not os.path.exists(bundle_name):
-		print("No such bundle found:", bundle_name, file=sys.stderr)
-		sys.exit(1)
+		bundle_name = "."
 
 
 	# Decompress the bundle and the files within it
