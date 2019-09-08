@@ -21,7 +21,7 @@ ANSI_END_FORMAT = "\033[0m"
 
 
 def nodes_missing_from_bundle(node_objs, bundle_dir):
-	"""Check for nodes missing from the bundle
+	"""Check for nodes missing from the bundle.
 	"""
 	print("Checking for nodes missing from the bundle")
 
@@ -1058,3 +1058,50 @@ def ssl_cert_error(node_objs):
 
 		print(node_table)
 
+
+
+def overlay_master_recovering(node_objs):
+	"""Check for overlay master 'recovering' errors in the Mesos master logs.
+	"""
+	print("Checking for overlay master recovering errors")
+
+	overlay_error_nodes = list()
+
+	for node_obj in node_objs:
+		if not node_obj.type == "master":
+			continue
+
+		mesos_log_list = glob.glob(node_obj.dir + os.sep + "dcos-mesos-master.service*")
+
+		if not len(mesos_log_list) == 1:
+			print("Unable to find log for dcos-mesos-master.service on", node_obj.ip, "(got", len(mesos_log_list), "matches)")
+
+			continue
+
+		mesos_log = mesos_log_list[0]
+
+		with open(mesos_log, "r") as mesos_master_log:
+			for each_line in mesos_master_log:
+				each_line = each_line.rstrip("\n")
+
+				if re.search("RECOVERING", each_line) is None:
+					continue
+
+				match = re.search(r"overlay-master .* `RECOVERING` state", each_line)
+
+				if match is not None:
+					overlay_error_nodes.append(node_obj)
+					break
+
+	# Print the node table
+	if overlay_error_nodes:
+		print(ANSI_RED_FG + "ALERT: overlay-master in RECOVERING state detected" + ANSI_END_FORMAT)
+
+		node_table = pandas.DataFrame(data={
+				"IP": [node.ip for node in overlay_error_nodes]
+			}
+		)
+
+		node_table.index += 1
+
+		print(node_table)
