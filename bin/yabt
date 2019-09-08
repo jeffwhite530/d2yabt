@@ -27,8 +27,11 @@ if __name__ == "__main__":
 							type=str, nargs="?",
 							help="The bundle file or directory")
 
+	parser.add_argument("--extract", "-x",
+							action="store_true",
+							help="Only extract the bundle")
+
 	# TODO: Add option to only look at a specific node
-	# TODO: Add option to skip checks and only extract unless given this or another option
 
 	yabt_args = parser.parse_args()
 
@@ -72,6 +75,11 @@ if __name__ == "__main__":
 
 	elif bundle_type == "konvoy_diag":
 		bundle_dir = yabt.konvoy.bundle.extract(bundle_name)
+
+
+	# If we were told to only extract the bundle, stop here
+	if yabt_args.extract is True:
+		sys.exit(0)
 
 
 	# Create the node objects list
