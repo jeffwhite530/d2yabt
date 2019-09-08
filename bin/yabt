@@ -86,8 +86,7 @@ if __name__ == "__main__":
 
 	# Health checks
 	if bundle_type == "dcos_diag":
-		# TODO: Check for agents missing from the bundle
-		# TODO: Check for master missing from the bundle
+		yabt.dcos.check.nodes_missing_from_bundle(node_objs, bundle_dir)
 		yabt.dcos.check.dcos_version(node_objs)
 		yabt.dcos.check.firewall_running(node_objs)
 		yabt.dcos.check.state_size(node_objs)

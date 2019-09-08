@@ -19,6 +19,59 @@ ANSI_RED_FG = "\033[31m"
 ANSI_END_FORMAT = "\033[0m"
 
 
+
+def nodes_missing_from_bundle(node_objs, bundle_dir):
+	"""Check for nodes missing from the bundle
+	"""
+	print("Checking for nodes missing from the bundle")
+
+	missing_nodes = list()
+
+	for node_obj in node_objs:
+		if not node_obj.type == "master":
+			continue
+
+		# Check for missing agents
+		with open(node_obj.dir + os.sep + "5050-master_slaves.json", "r") as json_file:
+			slaves_json = json.load(json_file)
+
+			for slave in slaves_json["slaves"]:
+				if "slave_public" in slave["reserved_resources"]:
+					if not os.path.exists(bundle_dir + os.sep + slave["hostname"] + "_agent_public"):
+						missing_nodes.append((slave["hostname"], "pub_agent"))
+
+				else:
+					if not os.path.exists(bundle_dir + os.sep + slave["hostname"] + "_agent"):
+						missing_nodes.append((slave["hostname"], "priv_agent"))
+
+		# Check for missing masters
+		with open(node_obj.dir + os.sep + "443-exhibitor_exhibitor_v1_cluster_list.json", "r") as  json_file:
+			exhib_json = json.load(json_file)
+
+			for master_ip in exhib_json["servers"]:
+				if not os.path.exists(bundle_dir + os.sep + master_ip + "_master"):
+					missing_nodes.append((master_ip, "master"))
+
+		break
+
+	# Print the node table
+	if missing_nodes:
+		print(ANSI_RED_FG + "ALERT: Nodes are missing from the bundle" + ANSI_END_FORMAT)
+
+		node_table = pandas.DataFrame(data={
+				"IP": [tup[0] for tup in missing_nodes],
+				"Type": [tup[1] for tup in missing_nodes],
+			}
+		)
+
+		node_table.sort_values("Type", inplace=True)
+		node_table.reset_index(inplace=True, drop=True)
+		node_table.index += 1
+
+		print(node_table)
+
+
+
 def dcos_version(node_objs):
 	"""Check that all nodes are using the same DC/OS version.
 	"""
