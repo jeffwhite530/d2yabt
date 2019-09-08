@@ -86,6 +86,8 @@ if __name__ == "__main__":
 
 	# Health checks
 	if bundle_type == "dcos_diag":
+		# TODO: Check for agents missing from the bundle
+		# TODO: Check for master missing from the bundle
 		yabt.dcos.check.dcos_version(node_objs)
 		yabt.dcos.check.firewall_running(node_objs)
 		yabt.dcos.check.state_size(node_objs)
@@ -107,7 +109,7 @@ if __name__ == "__main__":
 		yabt.dcos.check.crdb_underrep_ranges(node_objs)
 		yabt.dcos.check.crdb_monotonicity_error(node_objs)
 		yabt.dcos.check.crdb_contact_error(node_objs)
-		# TODO: Check for private registry certificate errors
+		yabt.dcos.check.ssl_cert_error(node_objs)
 		# TODO: Check for overlay master module in RECOVERING state events
 
 	if bundle_type == "service_diag":

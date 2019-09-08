@@ -959,3 +959,49 @@ def missing_dockerd(node_objs):
 
 		print(node_table)
 
+
+
+def ssl_cert_error(node_objs):
+	"""Check for SSL certificate problems.
+	"""
+	print("Checking for SSL certificate problems")
+
+	ssl_error_nodes = list()
+
+	for node_obj in node_objs:
+		if not node_obj.type.endswith("agent"):
+			continue
+
+		mesos_log_list = glob.glob(node_obj.dir + os.sep + "dcos-mesos-slave*.service*")
+
+		if not len(mesos_log_list) == 1:
+			print("Unable to find log for dcos-mesos-slave*.service on", node_obj.ip, "(got", len(mesos_log_list), "matches)")
+
+			continue
+
+		mesos_log = mesos_log_list[0]
+
+		with open(mesos_log, "r") as mesos_slave_log:
+			for each_line in mesos_slave_log:
+				each_line = each_line.rstrip("\n")
+
+				match = re.search(r"SSL certificate problem: (.*)$", each_line)
+
+				if match is not None:
+					ssl_error_nodes.append((node_obj, match.group(1)))
+					break
+
+	# Print the node table
+	if ssl_error_nodes:
+		print(ANSI_RED_FG + "ALERT: SSL certificate problem found in Mesos slave log (CA missing from /var/lib/dcos/pki/tls/certs?)" + ANSI_END_FORMAT)
+
+		node_table = pandas.DataFrame(data={
+				"IP": [tup[0].ip for tup in ssl_error_nodes],
+				"Problem": [tup[1] for tup in ssl_error_nodes],
+			}
+		)
+
+		node_table.index += 1
+
+		print(node_table)
+
