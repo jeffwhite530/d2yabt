@@ -7,19 +7,19 @@
 import sys
 import os
 import pandas
-import yabt
+import d2yabt
 
 
 
 def extract_diag(bundle_name):
 	"""Expand the DC/OS bundle into a directory.
 	"""
-	bundle_name = yabt.util.relocate_bundle(bundle_name)
-	bundle_dir = yabt.util.get_bundle_dir(bundle_name)
+	bundle_name = d2yabt.util.relocate_bundle(bundle_name)
+	bundle_dir = d2yabt.util.get_bundle_dir(bundle_name)
 
 	print("Extracting DC/OS diagnostic bundle to", bundle_dir)
 
-	yabt.util.unzip(bundle_name, bundle_dir)
+	d2yabt.util.unzip(bundle_name, bundle_dir)
 
 	return bundle_dir
 
@@ -28,12 +28,12 @@ def extract_diag(bundle_name):
 def extract_oneliner(bundle_name):
 	"""Expand the oneliner bundle into a directory.
 	"""
-	bundle_name = yabt.util.relocate_bundle(bundle_name)
-	bundle_dir = yabt.util.get_bundle_dir(bundle_name)
+	bundle_name = d2yabt.util.relocate_bundle(bundle_name)
+	bundle_dir = d2yabt.util.get_bundle_dir(bundle_name)
 
 	print("Extracting DC/OS oneliner bundle to", bundle_dir)
 
-	yabt.util.untar(bundle_name, bundle_dir)
+	d2yabt.util.untar(bundle_name, bundle_dir)
 
 	return bundle_dir
 
@@ -51,7 +51,7 @@ def get_nodes(bundle_dir, bundle_type):
 			if not os.path.isdir(bundle_dir + os.sep + node_dir):
 				continue
 
-			node_obj = yabt.Node()
+			node_obj = d2yabt.Node()
 			node_obj.dir = bundle_dir + os.sep + node_dir
 
 			if node_dir.endswith("_master"):
@@ -68,7 +68,7 @@ def get_nodes(bundle_dir, bundle_type):
 			node_objs.append(node_obj)
 
 	elif bundle_type == "dcos_oneliner":
-		node_obj = yabt.Node()
+		node_obj = d2yabt.Node()
 
 		node_obj.dir = bundle_dir
 		node_obj.ip = "unknown"

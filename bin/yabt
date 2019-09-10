@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""This is the main file of yabt.  In order to use it, just run it with
-PYTHONPATH set to include the location of yabt's library.
+"""This is the main file of d2yabt.  In order to use it, just run it with
+PYTHONPATH set to include the location of d2yabt's library.
 """
 
 
@@ -8,7 +8,7 @@ import sys
 import os
 import argparse
 import signal
-import yabt
+import d2yabt
 
 
 
@@ -51,28 +51,28 @@ if __name__ == "__main__":
 
 
 	# Decompress the bundle and the files within it
-	bundle_type = yabt.util.get_bundle_type(bundle_name)
-	bundle_dir = yabt.util.get_bundle_dir(bundle_name)
+	bundle_type = d2yabt.util.get_bundle_type(bundle_name)
+	bundle_dir = d2yabt.util.get_bundle_dir(bundle_name)
 
 	if os.path.isdir(bundle_name):
 		pass
 
-	elif yabt.util.is_bundle_extracted(bundle_name):
+	elif d2yabt.util.is_bundle_extracted(bundle_name):
 		print("Bundle has already been extracted, using existing directory,", bundle_dir)
 
 	elif bundle_type == "dcos_diag":
-		bundle_dir = yabt.dcos.bundle.extract_diag(bundle_name)
-		yabt.util.decompress_gzip_files(bundle_dir)
-		yabt.util.format_json(bundle_dir)
+		bundle_dir = d2yabt.dcos.bundle.extract_diag(bundle_name)
+		d2yabt.util.decompress_gzip_files(bundle_dir)
+		d2yabt.util.format_json(bundle_dir)
 
 	elif bundle_type == "dcos_oneliner":
-		bundle_dir = yabt.dcos.bundle.extract_oneliner(bundle_name)
+		bundle_dir = d2yabt.dcos.bundle.extract_oneliner(bundle_name)
 
 	elif bundle_type == "service_diag":
-		bundle_dir = yabt.service.bundle.extract(bundle_name)
+		bundle_dir = d2yabt.service.bundle.extract(bundle_name)
 
 	elif bundle_type == "konvoy_diag":
-		bundle_dir = yabt.konvoy.bundle.extract(bundle_name)
+		bundle_dir = d2yabt.konvoy.bundle.extract(bundle_name)
 
 
 	# If we were told to only extract the bundle, stop here
@@ -82,40 +82,40 @@ if __name__ == "__main__":
 
 	# Create the node objects list
 	if bundle_type in ("dcos_diag", "dcos_oneliner"):
-		node_objs = yabt.dcos.bundle.get_nodes(bundle_dir, bundle_type)
-		yabt.dcos.bundle.print_nodes(node_objs)
+		node_objs = d2yabt.dcos.bundle.get_nodes(bundle_dir, bundle_type)
+		d2yabt.dcos.bundle.print_nodes(node_objs)
 
 	elif bundle_type == "konvoy_diag":
-		node_objs = yabt.konvoy.bundle.get_nodes(bundle_dir)
-		yabt.konvoy.bundle.print_nodes(node_objs)
+		node_objs = d2yabt.konvoy.bundle.get_nodes(bundle_dir)
+		d2yabt.konvoy.bundle.print_nodes(node_objs)
 
 
 	# Health checks
 	if bundle_type == "dcos_diag":
-		yabt.dcos.check.nodes_missing_from_bundle(node_objs, bundle_dir)
-		yabt.dcos.check.dcos_version(node_objs)
-		yabt.dcos.check.firewall_running(node_objs)
-		yabt.dcos.check.state_size(node_objs)
-		yabt.dcos.check.inactive_frameworks(node_objs)
-		yabt.dcos.check.missing_dockerd(node_objs)
-		yabt.dcos.check.unreachable_agents_mesos_state(node_objs)
+		d2yabt.dcos.check.nodes_missing_from_bundle(node_objs, bundle_dir)
+		d2yabt.dcos.check.dcos_version(node_objs)
+		d2yabt.dcos.check.firewall_running(node_objs)
+		d2yabt.dcos.check.state_size(node_objs)
+		d2yabt.dcos.check.inactive_frameworks(node_objs)
+		d2yabt.dcos.check.missing_dockerd(node_objs)
+		d2yabt.dcos.check.unreachable_agents_mesos_state(node_objs)
 
 	if bundle_type in ("dcos_diag", "dcos_oneliner"):
-		yabt.dcos.check.unreachable_agents_mesos_log(node_objs)
-		yabt.dcos.check.mesos_leader_changes(node_objs)
-		yabt.dcos.check.zk_leader_changes(node_objs)
-		yabt.dcos.check.marathon_leader_changes(node_objs)
-		yabt.dcos.check.check_time_failures(node_objs)
-		yabt.dcos.check.kmem_presence(node_objs)
-		yabt.dcos.check.zk_fsync(node_objs)
-		yabt.dcos.check.zk_diskspace(node_objs)
-		yabt.dcos.check.zk_connection_exception(node_objs)
-		yabt.dcos.check.oom_presence(node_objs)
-		yabt.dcos.check.crdb_underrep_ranges(node_objs)
-		yabt.dcos.check.crdb_monotonicity_error(node_objs)
-		yabt.dcos.check.crdb_contact_error(node_objs)
-		yabt.dcos.check.ssl_cert_error(node_objs)
-		yabt.dcos.check.overlay_master_recovering(node_objs)
+		d2yabt.dcos.check.unreachable_agents_mesos_log(node_objs)
+		d2yabt.dcos.check.mesos_leader_changes(node_objs)
+		d2yabt.dcos.check.zk_leader_changes(node_objs)
+		d2yabt.dcos.check.marathon_leader_changes(node_objs)
+		d2yabt.dcos.check.check_time_failures(node_objs)
+		d2yabt.dcos.check.kmem_presence(node_objs)
+		d2yabt.dcos.check.zk_fsync(node_objs)
+		d2yabt.dcos.check.zk_diskspace(node_objs)
+		d2yabt.dcos.check.zk_connection_exception(node_objs)
+		d2yabt.dcos.check.oom_presence(node_objs)
+		d2yabt.dcos.check.crdb_underrep_ranges(node_objs)
+		d2yabt.dcos.check.crdb_monotonicity_error(node_objs)
+		d2yabt.dcos.check.crdb_contact_error(node_objs)
+		d2yabt.dcos.check.ssl_cert_error(node_objs)
+		d2yabt.dcos.check.overlay_master_recovering(node_objs)
 
 	if bundle_type == "service_diag":
 		pass

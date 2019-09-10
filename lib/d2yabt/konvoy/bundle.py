@@ -8,19 +8,19 @@ import sys
 import os
 import re
 import pandas
-import yabt
+import d2yabt
 
 
 
 def extract(bundle_name):
 	"""Expand the Konvoy bundle into a directory.
 	"""
-	bundle_name = yabt.util.relocate_bundle(bundle_name)
-	bundle_dir = yabt.util.get_bundle_dir(bundle_name)
+	bundle_name = d2yabt.util.relocate_bundle(bundle_name)
+	bundle_dir = d2yabt.util.get_bundle_dir(bundle_name)
 
 	print("Extracting Konvoy bundle to", bundle_dir)
 
-	yabt.util.untar(bundle_name, bundle_dir)
+	d2yabt.util.untar(bundle_name, bundle_dir)
 
 	for root, _dirs, files in os.walk(bundle_dir):
 		for each_file in files:
@@ -31,7 +31,7 @@ def extract(bundle_name):
 
 			file_with_path_no_ext = file_with_path[:-7]
 
-			yabt.util.untar(file_with_path, file_with_path_no_ext)
+			d2yabt.util.untar(file_with_path, file_with_path_no_ext)
 
 	return bundle_dir
 
@@ -51,7 +51,7 @@ def get_nodes(bundle_dir):
 		if re.search(r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$", node_dir) is None:
 			continue
 
-		node_obj = yabt.Node()
+		node_obj = d2yabt.Node()
 
 		node_obj.dir = bundle_dir + os.sep + node_dir
 		node_obj.ip = node_dir

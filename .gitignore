@@ -1,6 +1,6 @@
 *.swp
-lib/yabt/__pycache__/
-lib/yabt/dcos/__pycache__/
-lib/yabt/service/__pycache__/
-lib/yabt/konvoy/__pycache__/
+lib/d2yabt/__pycache__/
+lib/d2yabt/dcos/__pycache__/
+lib/d2yabt/service/__pycache__/
+lib/d2yabt/konvoy/__pycache__/
 test-bundles/
