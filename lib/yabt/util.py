@@ -70,23 +70,22 @@ def decompress_gzip_files(start_dir):
 			if not each_file.endswith(".gz"):
 				continue
 
-			file_with_path = root + os.sep + each_file
-
-			file_with_path_no_ext = file_with_path[:-3]
+			gzipfile_with_path = root + os.sep + each_file
+			gzipfile_with_path_no_ext = gzipfile_with_path[:-3]
 
 			try:
-				with gzip.open(file_with_path, "rb") as f_in:
-					with open(file_with_path_no_ext, "wb") as f_out:
+				with gzip.open(gzipfile_with_path, "rb") as f_in:
+					with open(gzipfile_with_path_no_ext, "wb") as f_out:
 						shutil.copyfileobj(f_in, f_out)
 
 			except EOFError:
-				print("Failed to expand", file_with_path, "EOF reached, incomplete file?")
+				print("Failed to expand", gzipfile_with_path, "EOF reached, incomplete file?")
 
 			except OSError:
-				print("Failed to expand", file_with_path + ", not a gzip file?")
+				print("Failed to expand", gzipfile_with_path + ", not a gzip file?")
 
 			else:
-				os.remove(file_with_path)
+				os.remove(gzipfile_with_path)
 
 
 
@@ -111,7 +110,6 @@ def format_json(bundle_dir):
 					json_data = json.load(json_file_handle)
 
 					json_file_handle.seek(0)
-
 					json_file_handle.write(json.dumps(json_data, indent=2, sort_keys=True))
 					json_file_handle.write("\n")
 
@@ -164,7 +162,7 @@ def get_bundle_type(bundle_name):
 					bundle_contents.append(each)
 
 		except zipfile.BadZipFile:
-			print("Failed to extract file, corrupt zip?  Attempting to list files with 7zip", file=sys.stderr)
+			print("Failed to list archive contents, corrupt zip?  Attempting to list contents with 7zip", file=sys.stderr)
 
 			zip7_command = shutil.which("7z")
 
@@ -234,7 +232,7 @@ def relocate_bundle(bundle_name):
 	if not bundle_name == bundle_name_base:
 		os.rename(bundle_name, bundle_name_base)
 
-		print("Moved", bundle_name_base, "to the current working directory")
+		print("Moved", bundle_name, "to the current working directory")
 
 		return bundle_name_base
 
