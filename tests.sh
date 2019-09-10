@@ -4,7 +4,7 @@
 
 set -e
 
-test_bundles_dir="${HOME}/yabt/test-bundles"
+test_bundles_dir="${HOME}/d2yabt/test-bundles"
 
 working_dir=$(mktemp -d)
 
