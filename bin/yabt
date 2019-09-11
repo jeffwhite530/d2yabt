@@ -85,6 +85,7 @@ if __name__ == "__main__":
 	# Create the node objects list
 	if bundle_type in ("dcos_diag", "dcos_oneliner"):
 		node_objs = d2yabt.dcos.bundle.get_nodes(bundle_dir, bundle_type)
+		d2yabt.dcos.bundle.get_node_info(node_objs)
 		d2yabt.dcos.bundle.print_nodes(node_objs)
 
 	elif bundle_type == "konvoy_diag":

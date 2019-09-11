@@ -6,6 +6,7 @@
 
 import sys
 import os
+import re
 import pandas
 import d2yabt
 
@@ -93,12 +94,34 @@ def get_nodes(bundle_dir, bundle_type):
 
 
 
+def get_node_info(node_objs):
+	"""Gather information about DC/OS nodes.
+	"""
+	for node_obj in node_objs:
+		# Get the Docker version
+		if node_obj.type == "master":
+			node_obj.docker_version = "n/a"
+
+		else:
+			if os.path.exists(os.path.join(node_obj.dir, "docker_--version.output")):
+				docker_version_text = open(os.path.join(node_obj.dir, "docker_--version.output"), "r").read()
+
+				docker_version = re.search("Docker version (\d+\.\d+\.\d+),", docker_version_text).group(1)
+
+				node_obj.docker_version = docker_version
+
+			else:
+				node_obj.docker_version = "unknown"
+
+
+
 def print_nodes(node_objs):
 	"""Prints a table of nodes.
 	"""
 	node_table = pandas.DataFrame(data={
 			"IP": [o.ip for o in node_objs],
 			"Type": [o.type for o in node_objs],
+			"Docker": [o.docker_version for o in node_objs],
 		}
 	)
 

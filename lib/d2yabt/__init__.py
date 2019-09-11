@@ -28,6 +28,7 @@ class Node:
 		self.type = ""
 		self.dir = ""
 		self.dcos_version = ""
+		self.docker_verison = ""
 		self.zk_fsync_warning_count = 0
 		self._zk_longest_fsyncs = list()
 		self.oom_invoked_count = 0

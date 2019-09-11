@@ -2,6 +2,8 @@
 
 # Run tests on yabt to ensure it works as expected
 
+# Note: PYTHONPATH=$PYTHONPATH:~/d2yabt/lib PATH=/home/white/d2yabt/bin:$PATH bash ~/d2yabt/tests.sh
+
 set -e
 
 test_bundles_dir="${HOME}/d2yabt/test-bundles"
