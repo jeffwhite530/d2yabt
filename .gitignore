@@ -4,3 +4,6 @@ lib/d2yabt/dcos/__pycache__/
 lib/d2yabt/service/__pycache__/
 lib/d2yabt/konvoy/__pycache__/
 test-bundles/
+build/
+dist/
+d2yabt.egg-info/
