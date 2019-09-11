@@ -53,10 +53,10 @@ def unzip(zip_file, output_dir):
 	output_dir_contents = os.listdir(output_dir)
 
 	if len(output_dir_contents) == 1:
-		for each in os.listdir(output_dir + os.sep + output_dir_contents[0]):
-			os.rename(output_dir + os.sep + output_dir_contents[0] + os.sep + each, output_dir + os.sep + each)
+		for each in os.listdir(os.path.join(output_dir, output_dir_contents[0])):
+			os.rename(os.path.join(output_dir, output_dir_contents[0], each), os.path.join(output_dir, each))
 
-		os.rmdir(output_dir + os.sep + output_dir_contents[0])
+		os.rmdir(os.path.join(output_dir, output_dir_contents[0]))
 
 
 
@@ -70,7 +70,7 @@ def decompress_gzip_files(start_dir):
 			if not each_file.endswith(".gz"):
 				continue
 
-			gzipfile_with_path = root + os.sep + each_file
+			gzipfile_with_path = os.path.join(root, each_file)
 			gzipfile_with_path_no_ext = gzipfile_with_path[:-3]
 
 			try:
@@ -103,7 +103,7 @@ def format_json(bundle_dir):
 			if each_file == "443-licensing_v1_audit_decrypt_1.json":
 				continue
 
-			file_with_path = root + os.sep + each_file
+			file_with_path = os.path.join(root, each_file)
 
 			with open(file_with_path, "r+") as json_file_handle:
 				try:

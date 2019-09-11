@@ -48,11 +48,11 @@ def get_nodes(bundle_dir, bundle_type):
 
 	if bundle_type == "dcos_diag":
 		for node_dir in os.listdir(bundle_dir):
-			if not os.path.isdir(bundle_dir + os.sep + node_dir):
+			if not os.path.isdir(os.path.join(bundle_dir, node_dir)):
 				continue
 
 			node_obj = d2yabt.Node()
-			node_obj.dir = bundle_dir + os.sep + node_dir
+			node_obj.dir = os.path.join(bundle_dir, node_dir)
 
 			if node_dir.endswith("_master"):
 				node_obj.type = "master"
@@ -73,13 +73,13 @@ def get_nodes(bundle_dir, bundle_type):
 		node_obj.dir = bundle_dir
 		node_obj.ip = "unknown"
 
-		if os.path.exists(bundle_dir + os.sep + "dcos-mesos-master.service.log"):
+		if os.path.exists(os.path.join(bundle_dir, "dcos-mesos-master.service.log")):
 			node_obj.type = "master"
 
-		elif os.path.exists(bundle_dir + os.sep + "dcos-mesos-slave.service.log"):
+		elif os.path.exists(os.path.join(bundle_dir, "dcos-mesos-slave.service.log")):
 			node_obj.type = "priv_agent"
 
-		elif os.path.exists(bundle_dir + os.sep + "dcos-mesos-slave-public.service.log"):
+		elif os.path.exists(os.path.join(bundle_dir, "dcos-mesos-slave-public.service.log")):
 			node_obj.type = "pub_agent"
 
 		node_objs.append(node_obj)

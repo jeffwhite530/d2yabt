@@ -32,20 +32,20 @@ def nodes_missing_from_bundle(node_objs, bundle_dir):
 			continue
 
 		# Check for missing agents
-		with open(node_obj.dir + os.sep + "5050-master_slaves.json", "r") as json_file:
+		with open(os.path.join(node_obj.dir, "5050-master_slaves.json"), "r") as json_file:
 			slaves_json = json.load(json_file)
 
 			for slave in slaves_json["slaves"]:
 				if "slave_public" in slave["reserved_resources"]:
-					if not os.path.exists(bundle_dir + os.sep + slave["hostname"] + "_agent_public"):
+					if not os.path.exists(os.path.join(bundle_dir, slave["hostname"]) + "_agent_public"):
 						missing_nodes.append((slave["hostname"], "pub_agent"))
 
 				else:
-					if not os.path.exists(bundle_dir + os.sep + slave["hostname"] + "_agent"):
+					if not os.path.exists(os.path.join(bundle_dir, slave["hostname"]) + "_agent"):
 						missing_nodes.append((slave["hostname"], "priv_agent"))
 
 		# Check for missing masters
-		with open(node_obj.dir + os.sep + "443-exhibitor_exhibitor_v1_cluster_list.json", "r") as  json_file:
+		with open(os.path.join(node_obj.dir, "443-exhibitor_exhibitor_v1_cluster_list.json"), "r") as  json_file:
 			try:
 				exhib_json = json.load(json_file)
 
@@ -54,7 +54,7 @@ def nodes_missing_from_bundle(node_objs, bundle_dir):
 				continue
 
 			for master_ip in exhib_json["servers"]:
-				if not os.path.exists(bundle_dir + os.sep + master_ip + "_master"):
+				if not os.path.exists(os.path.join(bundle_dir, master_ip) + "_master"):
 					missing_nodes.append((master_ip, "master"))
 
 		break
@@ -127,12 +127,12 @@ def firewall_running(node_objs):
 	nodes_with_firewalld = list()
 
 	for node_obj in sorted(node_objs, key=lambda x: x.type):
-		if not os.path.exists(node_obj.dir + os.sep + "ps_aux_ww_Z.output"):
+		if not os.path.exists(os.path.join(node_obj.dir, "ps_aux_ww_Z.output")):
 			print("Unable to check for running firewall on", node_obj.ip + ", no ps output available")
 
 			continue
 
-		with open(node_obj.dir + os.sep + "ps_aux_ww_Z.output", "r") as ps_file:
+		with open(os.path.join(node_obj.dir, "ps_aux_ww_Z.output"), "r") as ps_file:
 			for each_line in ps_file:
 				each_line = each_line.rstrip("\n")
 
@@ -168,7 +168,7 @@ def unreachable_agents_mesos_log(node_objs):
 		if not node_obj.type == "master":
 			continue
 
-		mesos_log_list = glob.glob(node_obj.dir + os.sep + "dcos-mesos-master.service*")
+		mesos_log_list = glob.glob(os.path.join(node_obj.dir, "dcos-mesos-master.service*"))
 
 		if not len(mesos_log_list) == 1:
 			print("Unable to find log for dcos-mesos-master.service on", node_obj.ip, "(got", len(mesos_log_list), "matches)")
@@ -249,7 +249,7 @@ def check_time_failures(node_objs):
 			if not file_name.endswith(".service"):
 				continue
 
-			with open(node_obj.dir + os.sep + file_name, "r") as log_file:
+			with open(os.path.join(node_obj.dir, file_name), "r") as log_file:
 				try:
 					for each_line in log_file:
 						each_line = each_line.rstrip("\n")
@@ -293,7 +293,7 @@ def kmem_presence(node_objs):
 		if node_obj.type == "master":
 			continue
 
-		dmesg_file_list = glob.glob(node_obj.dir + os.sep + "dmesg*")
+		dmesg_file_list = glob.glob(os.path.join(node_obj.dir, "dmesg*"))
 
 		if not len(dmesg_file_list) == 1:
 			print("Unable to find dmesg file on", node_obj.ip, "(got", len(dmesg_file_list), "matches)")
@@ -344,7 +344,7 @@ def zk_fsync(node_objs):
 		if not node_obj.type == "master":
 			continue
 
-		exhibitor_log_list = glob.glob(node_obj.dir + os.sep + "dcos-exhibitor.service*")
+		exhibitor_log_list = glob.glob(os.path.join(node_obj.dir, "dcos-exhibitor.service*"))
 
 		if not len(exhibitor_log_list) == 1:
 			print("Unable to find log for dcos-exhibitor.service on", node_obj.ip, "(got", len(exhibitor_log_list), "matches)")
@@ -397,7 +397,7 @@ def zk_diskspace(node_objs):
 		if not node_obj.type == "master":
 			continue
 
-		exhibitor_log_list = glob.glob(node_obj.dir + os.sep + "dcos-exhibitor.service*")
+		exhibitor_log_list = glob.glob(os.path.join(node_obj.dir, "dcos-exhibitor.service*"))
 
 		if not len(exhibitor_log_list) == 1:
 			print("Unable to find log for dcos-exhibitor.service on", node_obj.ip, "(got", len(exhibitor_log_list), "matches)")
@@ -443,7 +443,7 @@ def zk_connection_exception(node_objs):
 		if not node_obj.type == "master":
 			continue
 
-		exhibitor_log_list = glob.glob(node_obj.dir + os.sep + "dcos-exhibitor.service*")
+		exhibitor_log_list = glob.glob(os.path.join(node_obj.dir, "dcos-exhibitor.service*"))
 
 		if not len(exhibitor_log_list) == 1:
 			print("Unable to find log for dcos-exhibitor.service on", node_obj.ip, "(got", len(exhibitor_log_list), "matches)")
@@ -496,7 +496,7 @@ def oom_presence(node_objs):
 	oom_node_objs = list()
 
 	for node_obj in node_objs:
-		dmesg_file_list = glob.glob(node_obj.dir + os.sep + "dmesg*")
+		dmesg_file_list = glob.glob(os.path.join(node_obj.dir, "dmesg*"))
 
 		if not len(dmesg_file_list) == 1:
 			print("Unable to find dmesg file on", node_obj.ip, "(got", len(dmesg_file_list), "matches)")
@@ -550,7 +550,7 @@ def crdb_underrep_ranges(node_objs):
 		if not node_obj.type == "master":
 			continue
 
-		poststart_log_list = glob.glob(node_obj.dir + os.sep + "dcos-checks-poststart.service*")
+		poststart_log_list = glob.glob(os.path.join(node_obj.dir, "dcos-checks-poststart.service*"))
 
 		if not len(poststart_log_list) == 1:
 			print("Unable to find dcos-checks-poststart.service log on", node_obj.ip, "(got", len(poststart_log_list), "matches)")
@@ -596,7 +596,7 @@ def crdb_monotonicity_error(node_objs):
 		if not node_obj.type == "master":
 			continue
 
-		crdb_log_list = glob.glob(node_obj.dir + os.sep + "dcos-cockroach.service*")
+		crdb_log_list = glob.glob(os.path.join(node_obj.dir, "dcos-cockroach.service*"))
 
 		if not len(crdb_log_list) == 1:
 			print("Unable to find dcos-cockroach.service log on", node_obj.ip, "(got", len(crdb_log_list), "matches)")
@@ -646,7 +646,7 @@ def crdb_contact_error(node_objs):
 		if not node_obj.type == "master":
 			continue
 
-		crdb_log_list = glob.glob(node_obj.dir + os.sep + "dcos-cockroach.service*")
+		crdb_log_list = glob.glob(os.path.join(node_obj.dir, "dcos-cockroach.service*"))
 
 		if not len(crdb_log_list) == 1:
 			print("Unable to find dcos-cockroach.service log on", node_obj.ip, "(got", len(crdb_log_list), "matches)")
@@ -694,8 +694,8 @@ def state_size(node_objs):
 		if not node_obj.type == "master":
 			continue
 
-		if os.path.exists(node_obj.dir + os.sep + "5050-master_state.json"):
-			state_size_bytes = os.stat(node_obj.dir + os.sep + "5050-master_state.json").st_size
+		if os.path.exists(os.path.join(node_obj.dir, "5050-master_state.json")):
+			state_size_bytes = os.stat(os.path.join(node_obj.dir, "5050-master_state.json")).st_size
 
 			if state_size_bytes > 5242880:
 				print(ANSI_RED_FG + "ALERT: Mesos state.json is larger than 5MB (" + str(round(state_size_bytes / 1024 / 1024, 2)) + " MB)" + ANSI_END_FORMAT)
@@ -715,7 +715,7 @@ def mesos_leader_changes(node_objs):
 		if not node_obj.type == "master":
 			continue
 
-		mesos_log_list = glob.glob(node_obj.dir + os.sep + "dcos-mesos-master.service*")
+		mesos_log_list = glob.glob(os.path.join(node_obj.dir, "dcos-mesos-master.service*"))
 
 		if not len(mesos_log_list) == 1:
 			print("Unable to find log for dcos-mesos-master.service on", node_obj.ip, "(got", len(mesos_log_list), "matches)")
@@ -771,7 +771,7 @@ def zk_leader_changes(node_objs):
 		if not node_obj.type == "master":
 			continue
 
-		exhibitor_log_list = glob.glob(node_obj.dir + os.sep + "dcos-exhibitor.service*")
+		exhibitor_log_list = glob.glob(os.path.join(node_obj.dir, "dcos-exhibitor.service*"))
 
 		if not len(exhibitor_log_list) == 1:
 			print("Unable to find log for dcos-exhibitor.service on", node_obj.ip, "(got", len(exhibitor_log_list), "matches)")
@@ -826,7 +826,7 @@ def marathon_leader_changes(node_objs):
 		if not node_obj.type == "master":
 			continue
 
-		marathon_log_list = glob.glob(node_obj.dir + os.sep + "dcos-marathon.service*")
+		marathon_log_list = glob.glob(os.path.join(node_obj.dir, "dcos-marathon.service*"))
 
 		if not len(marathon_log_list) == 1:
 			print("Unable to find log for dcos-marathon.service on", node_obj.ip, "(got", len(marathon_log_list), "matches)")
@@ -882,10 +882,10 @@ def unreachable_agents_mesos_state(node_objs):
 		if not node_obj.type == "master":
 			continue
 
-		if not os.path.exists(node_obj.dir + os.sep + "5050-registrar_1__registry.json"):
+		if not os.path.exists(os.path.join(node_obj.dir, "5050-registrar_1__registry.json")):
 			continue
 
-		with open(node_obj.dir + os.sep + "5050-registrar_1__registry.json", "r") as json_file_handle:
+		with open(os.path.join(node_obj.dir, "5050-registrar_1__registry.json"), "r") as json_file_handle:
 			try:
 				json_data = json.load(json_file_handle)
 
@@ -938,10 +938,10 @@ def inactive_frameworks(node_objs):
 		if not node_obj.type == "master":
 			continue
 
-		if not os.path.exists(node_obj.dir + os.sep + "5050-master_state.json"):
+		if not os.path.exists(os.path.join(node_obj.dir, "5050-master_state.json")):
 			continue
 
-		with open(node_obj.dir + os.sep + "5050-master_state.json", "r") as json_file_handle:
+		with open(os.path.join(node_obj.dir, "5050-master_state.json"), "r") as json_file_handle:
 			try:
 				json_data = json.load(json_file_handle)
 
@@ -985,12 +985,12 @@ def missing_dockerd(node_objs):
 		if node_obj.type == "master":
 			continue
 
-		if not os.path.exists(node_obj.dir + os.sep + "ps_aux_ww_Z.output"):
+		if not os.path.exists(os.path.join(node_obj.dir, "ps_aux_ww_Z.output")):
 			print("Unable to check for missing Docker daemon on", node_obj.ip + ", no ps output available")
 
 			continue
 
-		with open(node_obj.dir + os.sep + "ps_aux_ww_Z.output", "r") as ps_file:
+		with open(os.path.join(node_obj.dir, "ps_aux_ww_Z.output"), "r") as ps_file:
 			found_dockerd = False
 
 			for each_line in ps_file:
@@ -1030,7 +1030,7 @@ def ssl_cert_error(node_objs):
 		if not node_obj.type.endswith("agent"):
 			continue
 
-		mesos_log_list = glob.glob(node_obj.dir + os.sep + "dcos-mesos-slave*.service*")
+		mesos_log_list = glob.glob(os.path.join(node_obj.dir, "dcos-mesos-slave*.service*"))
 
 		if not len(mesos_log_list) == 1:
 			print("Unable to find log for dcos-mesos-slave*.service on", node_obj.ip, "(got", len(mesos_log_list), "matches)")
@@ -1076,7 +1076,7 @@ def overlay_master_recovering(node_objs):
 		if not node_obj.type == "master":
 			continue
 
-		mesos_log_list = glob.glob(node_obj.dir + os.sep + "dcos-mesos-master.service*")
+		mesos_log_list = glob.glob(os.path.join(node_obj.dir, "dcos-mesos-master.service*"))
 
 		if not len(mesos_log_list) == 1:
 			print("Unable to find log for dcos-mesos-master.service on", node_obj.ip, "(got", len(mesos_log_list), "matches)")

@@ -27,7 +27,7 @@ def extract(bundle_name):
 			if not each_file.endswith(".tar.gz"):
 				continue
 
-			file_with_path = root + os.sep + each_file
+			file_with_path = os.path.join(root, each_file)
 
 			file_with_path_no_ext = file_with_path[:-7]
 
@@ -44,8 +44,8 @@ def get_nodes(bundle_dir):
 
 	node_objs = list()
 
-	for node_dir in os.listdir(bundle_dir + os.sep + "bundles"):
-		if not os.path.isdir(bundle_dir + os.sep + "bundles" + os.sep + node_dir):
+	for node_dir in os.listdir(os.path.join(bundle_dir, "bundles")):
+		if not os.path.isdir(os.path.join(bundle_dir, "bundles", node_dir)):
 			continue
 
 		if re.search(r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$", node_dir) is None:
@@ -53,7 +53,7 @@ def get_nodes(bundle_dir):
 
 		node_obj = d2yabt.Node()
 
-		node_obj.dir = bundle_dir + os.sep + node_dir
+		node_obj.dir = os.path.join(bundle_dir, node_dir)
 		node_obj.ip = node_dir
 		node_obj.type = "Konvoy kubelet"
 
