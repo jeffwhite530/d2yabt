@@ -3,6 +3,8 @@ d2yabt (Yet Another Bundle Tool) is used to analyze [DC/OS diagnostic bundles](h
 1. Decompresses the bundle and the files within it
 2. Reads JSON and log files to find common problems and warns about them
 
+*d2yabt is neither supported nor endorsed by [D2iQ](https://d2iq.com).*
+
 ### To install
 d2yabt is on PyPI so install it via pip:
 ```
