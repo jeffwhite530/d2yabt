@@ -16,6 +16,10 @@ import d2yabt.konvoy.check
 
 
 
+__version__ = "1.0.3"
+
+
+
 class Node:
 	"""This class holds information about a DC/OS or Konvoy node.
 	"""

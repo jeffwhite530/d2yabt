@@ -27,6 +27,8 @@ if __name__ == "__main__":
 							type=str, nargs="?",
 							help="The bundle file or directory")
 
+	parser.add_argument("--version", action="version", version=d2yabt.__version__)
+
 	parser.add_argument("--extract", "-x",
 							action="store_true",
 							help="Only extract the bundle")

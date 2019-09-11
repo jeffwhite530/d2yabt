@@ -5,12 +5,13 @@
 
 
 import setuptools
+import d2yabt
 
 
 
 setuptools.setup(
 	name="d2yabt",
-	version="1.0.2",
+	version=d2yabt.__version__,
 	author="Jeff White",
 	author_email="44498114+jeffwhite530@users.noreply.github.com",
 	description="A diagnostic bundle analyzer for D2iQ products",
