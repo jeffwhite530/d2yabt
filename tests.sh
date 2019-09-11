@@ -127,7 +127,7 @@ echo "	Use existing dir and examine ..."
 yabt bundle-oneliner >/dev/null
 
 
-echo "All test were successfull!"
+echo "All tests were successfull!"
 
 echo "Removing temp directory $working_dir"
 

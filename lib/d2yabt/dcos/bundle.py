@@ -106,12 +106,22 @@ def get_node_info(node_objs):
 			if os.path.exists(os.path.join(node_obj.dir, "docker_--version.output")):
 				docker_version_text = open(os.path.join(node_obj.dir, "docker_--version.output"), "r").read()
 
-				docker_version = re.search("Docker version (\d+\.\d+\.\d+),", docker_version_text).group(1)
+				docker_version = re.search(r"Docker version (\d+\.\d+\.\d+),", docker_version_text).group(1)
 
 				node_obj.docker_version = docker_version
 
 			else:
 				node_obj.docker_version = "unknown"
+
+		# Get the OS
+		if os.path.exists(os.path.join(node_obj.dir, "binsh_-c_cat etc*-release.output")):
+			os_file_text = open(os.path.join(node_obj.dir, "binsh_-c_cat etc*-release.output"), "r").read()
+
+			node_os = re.search(r'ID="(.*)"', os_file_text).group(1)
+			node_obj.os = node_os
+
+		else:
+			node_obj.os = "unkown"
 
 
 
@@ -121,6 +131,7 @@ def print_nodes(node_objs):
 	node_table = pandas.DataFrame(data={
 			"IP": [o.ip for o in node_objs],
 			"Type": [o.type for o in node_objs],
+			"OS": [o.os for o in node_objs],
 			"Docker": [o.docker_version for o in node_objs],
 		}
 	)

@@ -27,6 +27,7 @@ class Node:
 		self.ip = ""
 		self.type = ""
 		self.dir = ""
+		self.os = ""
 		self.dcos_version = ""
 		self.docker_verison = ""
 		self.zk_fsync_warning_count = 0
