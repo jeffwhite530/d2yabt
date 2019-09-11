@@ -46,7 +46,12 @@ def nodes_missing_from_bundle(node_objs, bundle_dir):
 
 		# Check for missing masters
 		with open(node_obj.dir + os.sep + "443-exhibitor_exhibitor_v1_cluster_list.json", "r") as  json_file:
-			exhib_json = json.load(json_file)
+			try:
+				exhib_json = json.load(json_file)
+
+			except json.decoder.JSONDecodeError:
+				print("Unable to parse exhibitor JSON from", node_obj.ip, file=sys.stderr)
+				continue
 
 			for master_ip in exhib_json["servers"]:
 				if not os.path.exists(bundle_dir + os.sep + master_ip + "_master"):
