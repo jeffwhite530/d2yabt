@@ -29,9 +29,9 @@ if __name__ == "__main__":
 
 	parser.add_argument("--version", action="version", version=d2yabt.__version__)
 
-	parser.add_argument("--extract", "-x",
+	parser.add_argument("-x", "--extract",
 							action="store_true",
-							help="Only extract the bundle")
+							help="only extract the bundle")
 
 	yabt_args = parser.parse_args()
 

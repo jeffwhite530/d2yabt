@@ -4,7 +4,7 @@ d2yabt (Yet Another Bundle Tool) is used to analyze [DC/OS diagnostic bundles](h
 2. Reads JSON and log files to find common problems and warns about them
 
 ### To install
-d2yabt is on PyPi so install it via pip:
+d2yabt is on PyPI so install it via pip:
 ```
 pip3 install d2yabt
 ```
@@ -37,7 +37,7 @@ Next, clone the repo:
 git clone git@github.com:jeffwhite530/d2yabt.git
 ```
 
-You'll need to adjust PYTHONPATH so it can find the library.  Assuming d2yabt is in your home directory, run it like so:
+Finally, adjust PYTHONPATH so Python can find the library.  Assuming d2yabt is in your home directory, run it like so:
 ```
 PYTHONPATH=$PYTHONPATH:~/d2yabt/lib ~/d2yabt/bin/yabt path/to/bundle.zip
 ```
