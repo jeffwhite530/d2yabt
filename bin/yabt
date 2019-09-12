@@ -99,6 +99,7 @@ if __name__ == "__main__":
 		d2yabt.dcos.check.dcos_version(node_objs)
 		d2yabt.dcos.check.firewall_running(node_objs)
 		d2yabt.dcos.check.state_size(node_objs)
+		d2yabt.dcos.check.ntp_sync(node_objs)
 		d2yabt.dcos.check.inactive_frameworks(node_objs)
 		d2yabt.dcos.check.missing_dockerd(node_objs)
 		d2yabt.dcos.check.unreachable_agents_mesos_state(node_objs)

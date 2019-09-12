@@ -1110,3 +1110,34 @@ def overlay_master_recovering(node_objs):
 		node_table.index += 1
 
 		print(node_table)
+
+
+
+def ntp_sync(node_objs):
+	"""Check that the output of timedatectl says NTP is synchronized.
+	"""
+	print("Checking for NTP synchronization from timedatectl")
+
+	ntp_sync_nodes = list()
+
+	for node_obj in node_objs:
+		if not glob.glob(os.path.join(node_obj.dir, "timedatectl.output")):
+			continue
+
+		timedatectl_text = open(os.path.join(node_obj.dir, "timedatectl.output"), "r").read()
+
+		if re.search(r"NTP synchronized: yes", timedatectl_text) is None:
+			ntp_sync_nodes.append(node_obj)
+			
+	if ntp_sync_nodes:
+		print(ANSI_RED_FG + "ALERT: Nodes with NTP not synchronized according to timedatectl found" + ANSI_END_FORMAT)
+
+		node_table = pandas.DataFrame(data={
+				"IP": [node.ip for node in ntp_sync_nodes]
+			}
+		)
+
+		node_table.index += 1
+
+		print(node_table)
+
