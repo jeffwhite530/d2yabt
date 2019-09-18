@@ -32,17 +32,21 @@ def nodes_missing_from_bundle(node_objs, bundle_dir):
 			continue
 
 		# Check for missing agents
-		with open(os.path.join(node_obj.dir, "5050-master_slaves.json"), "r") as json_file:
-			slaves_json = json.load(json_file)
+		try:
+			with open(os.path.join(node_obj.dir, "5050-master_slaves.json"), "r") as json_file:
+				slaves_json = json.load(json_file)
 
-			for slave in slaves_json["slaves"]:
-				if "slave_public" in slave["reserved_resources"]:
-					if not os.path.exists(os.path.join(bundle_dir, slave["hostname"]) + "_agent_public"):
-						missing_nodes.append((slave["hostname"], "pub_agent"))
+		except FileNotFoundError:
+			continue
 
-				else:
-					if not os.path.exists(os.path.join(bundle_dir, slave["hostname"]) + "_agent"):
-						missing_nodes.append((slave["hostname"], "priv_agent"))
+		for slave in slaves_json["slaves"]:
+			if "slave_public" in slave["reserved_resources"]:
+				if not os.path.exists(os.path.join(bundle_dir, slave["hostname"]) + "_agent_public"):
+					missing_nodes.append((slave["hostname"], "pub_agent"))
+
+			else:
+				if not os.path.exists(os.path.join(bundle_dir, slave["hostname"]) + "_agent"):
+					missing_nodes.append((slave["hostname"], "priv_agent"))
 
 		# Check for missing masters
 		with open(os.path.join(node_obj.dir, "443-exhibitor_exhibitor_v1_cluster_list.json"), "r") as  json_file:
@@ -86,7 +90,7 @@ def dcos_version(node_objs):
 
 	for node_obj in node_objs:
 		try:
-			with open(node_obj.dir + "/opt/mesosphere/etc/dcos-version.json", "r") as json_file:
+			with open(os.path.join(node_obj.dir, "opt/mesosphere/etc/dcos-version.json"), "r") as json_file:
 				version_json = json.load(json_file)
 
 			node_obj.dcos_version = version_json["version"]
