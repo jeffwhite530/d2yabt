@@ -1,2 +1,3 @@
 * Add checks to verify nodes meet minimum CPU, memory, and disk requirements
+* Print security mode
 

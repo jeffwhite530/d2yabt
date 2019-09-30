@@ -34,7 +34,12 @@ def nodes_missing_from_bundle(node_objs, bundle_dir):
 		# Check for missing agents
 		try:
 			with open(os.path.join(node_obj.dir, "5050-master_slaves.json"), "r") as json_file:
-				slaves_json = json.load(json_file)
+				try:
+					slaves_json = json.load(json_file)
+
+				except json.decoder.JSONDecodeError:
+					print("Unable to parse master_slaves JSON from", node_obj.ip, file=sys.stderr)
+					continue
 
 		except FileNotFoundError:
 			continue
@@ -49,13 +54,17 @@ def nodes_missing_from_bundle(node_objs, bundle_dir):
 					missing_nodes.append((slave["hostname"], "priv_agent"))
 
 		# Check for missing masters
-		with open(os.path.join(node_obj.dir, "443-exhibitor_exhibitor_v1_cluster_list.json"), "r") as  json_file:
-			try:
-				exhib_json = json.load(json_file)
+		try:
+			with open(os.path.join(node_obj.dir, "443-exhibitor_exhibitor_v1_cluster_list.json"), "r") as  json_file:
+				try:
+					exhib_json = json.load(json_file)
 
-			except json.decoder.JSONDecodeError:
-				print("Unable to parse exhibitor JSON from", node_obj.ip, file=sys.stderr)
-				continue
+				except json.decoder.JSONDecodeError:
+					print("Unable to parse exhibitor JSON from", node_obj.ip, file=sys.stderr)
+					continue
+
+		except FileNotFoundError:
+			continue
 
 			for master_ip in exhib_json["servers"]:
 				if not os.path.exists(os.path.join(bundle_dir, master_ip) + "_master"):
