@@ -33,7 +33,7 @@ def nodes_missing_from_bundle(node_objs, bundle_dir):
 
 		# Check for missing agents
 		try:
-			with open(os.path.join(node_obj.dir, "5050-master_slaves.json"), "r") as json_file:
+			with open(os.path.join(node_obj.dir, "5050-master_slaves.json"), "r", encoding="utf-8") as json_file:
 				try:
 					slaves_json = json.load(json_file)
 
@@ -55,7 +55,7 @@ def nodes_missing_from_bundle(node_objs, bundle_dir):
 
 		# Check for missing masters
 		try:
-			with open(os.path.join(node_obj.dir, "443-exhibitor_exhibitor_v1_cluster_list.json"), "r") as  json_file:
+			with open(os.path.join(node_obj.dir, "443-exhibitor_exhibitor_v1_cluster_list.json"), "r", encoding="utf-8") as  json_file:
 				try:
 					exhib_json = json.load(json_file)
 
@@ -99,7 +99,7 @@ def dcos_version(node_objs):
 
 	for node_obj in node_objs:
 		try:
-			with open(os.path.join(node_obj.dir, "opt/mesosphere/etc/dcos-version.json"), "r") as json_file:
+			with open(os.path.join(node_obj.dir, "opt/mesosphere/etc/dcos-version.json"), "r", encoding="utf-8") as json_file:
 				version_json = json.load(json_file)
 
 			node_obj.dcos_version = version_json["version"]
@@ -145,7 +145,7 @@ def firewall_running(node_objs):
 
 			continue
 
-		with open(os.path.join(node_obj.dir, "ps_aux_ww_Z.output"), "r") as ps_file:
+		with open(os.path.join(node_obj.dir, "ps_aux_ww_Z.output"), "r", encoding="utf-8") as ps_file:
 			for each_line in ps_file:
 				each_line = each_line.rstrip("\n")
 
@@ -190,7 +190,7 @@ def unreachable_agents_mesos_log(node_objs):
 
 		mesos_log = mesos_log_list[0]
 
-		with open(mesos_log, "r") as mesos_master_log:
+		with open(mesos_log, "r", encoding="utf-8") as mesos_master_log:
 			for each_line in mesos_master_log:
 				each_line = each_line.rstrip("\n")
 
@@ -262,7 +262,7 @@ def check_time_failures(node_objs):
 			if not file_name.endswith(".service"):
 				continue
 
-			with open(os.path.join(node_obj.dir, file_name), "r") as log_file:
+			with open(os.path.join(node_obj.dir, file_name), "r", encoding="utf-8") as log_file:
 				try:
 					for each_line in log_file:
 						each_line = each_line.rstrip("\n")
@@ -317,7 +317,7 @@ def kmem_presence(node_objs):
 
 		kmem_slub_error_count = 0
 
-		with open(dmesg_file, "r") as dmesg_file_handle:
+		with open(dmesg_file, "r", encoding="utf-8") as dmesg_file_handle:
 			for each_line in dmesg_file_handle:
 				each_line = each_line.rstrip("\n")
 
@@ -366,7 +366,7 @@ def zk_fsync(node_objs):
 
 		exhibitor_log = exhibitor_log_list[0]
 
-		with open(exhibitor_log, "r") as zk_file_handle:
+		with open(exhibitor_log, "r", encoding="utf-8") as zk_file_handle:
 			for each_line in zk_file_handle:
 				each_line = each_line.rstrip("\n")
 
@@ -419,7 +419,7 @@ def zk_diskspace(node_objs):
 
 		exhibitor_log = exhibitor_log_list[0]
 
-		with open(exhibitor_log, "r") as zk_file_handle:
+		with open(exhibitor_log, "r", encoding="utf-8") as zk_file_handle:
 			for each_line in zk_file_handle:
 				each_line = each_line.rstrip("\n")
 
@@ -465,7 +465,7 @@ def zk_connection_exception(node_objs):
 
 		exhibitor_log = exhibitor_log_list[0]
 
-		with open(exhibitor_log, "r") as zk_file_handle:
+		with open(exhibitor_log, "r", encoding="utf-8") as zk_file_handle:
 			for each_line in zk_file_handle:
 				each_line = each_line.rstrip("\n")
 
@@ -518,7 +518,7 @@ def oom_presence(node_objs):
 
 		dmesg_file = dmesg_file_list[0]
 
-		with open(dmesg_file, "r") as dmesg_file_handle:
+		with open(dmesg_file, "r", encoding="utf-8") as dmesg_file_handle:
 			for each_line in dmesg_file_handle:
 				each_line = each_line.rstrip("\n")
 
@@ -572,7 +572,7 @@ def crdb_underrep_ranges(node_objs):
 
 		poststart_log = poststart_log_list[0]
 
-		with open(poststart_log, "r") as poststart_file:
+		with open(poststart_log, "r", encoding="utf-8") as poststart_file:
 			for each_line in poststart_file:
 				each_line = each_line.rstrip("\n")
 
@@ -620,7 +620,7 @@ def crdb_monotonicity_error(node_objs):
 
 		error_count = 0
 
-		with open(crdb_log, "r") as crdb_log_handle:
+		with open(crdb_log, "r", encoding="utf-8") as crdb_log_handle:
 			for each_line in crdb_log_handle:
 				each_line = each_line.rstrip("\n")
 
@@ -670,7 +670,7 @@ def crdb_contact_error(node_objs):
 
 		error_count = 0
 
-		with open(crdb_log, "r") as crdb_log_handle:
+		with open(crdb_log, "r", encoding="utf-8") as crdb_log_handle:
 			for each_line in crdb_log_handle:
 				each_line = each_line.rstrip("\n")
 
@@ -737,7 +737,7 @@ def mesos_leader_changes(node_objs):
 
 		mesos_log = mesos_log_list[0]
 
-		with open(mesos_log, "r") as mesos_master_log:
+		with open(mesos_log, "r", encoding="utf-8") as mesos_master_log:
 			for each_line in mesos_master_log:
 				each_line = each_line.rstrip("\n")
 
@@ -793,7 +793,7 @@ def zk_leader_changes(node_objs):
 
 		exhibitor_log = exhibitor_log_list[0]
 
-		with open(exhibitor_log, "r") as exhibitor_log_handle:
+		with open(exhibitor_log, "r", encoding="utf-8") as exhibitor_log_handle:
 			for each_line in exhibitor_log_handle:
 				each_line = each_line.rstrip("\n")
 
@@ -848,7 +848,7 @@ def marathon_leader_changes(node_objs):
 
 		marathon_log = marathon_log_list[0]
 
-		with open(marathon_log, "r") as marathon_log_handle:
+		with open(marathon_log, "r", encoding="utf-8") as marathon_log_handle:
 			for each_line in marathon_log_handle:
 				each_line = each_line.rstrip("\n")
 
@@ -898,7 +898,7 @@ def unreachable_agents_mesos_state(node_objs):
 		if not os.path.exists(os.path.join(node_obj.dir, "5050-registrar_1__registry.json")):
 			continue
 
-		with open(os.path.join(node_obj.dir, "5050-registrar_1__registry.json"), "r") as json_file_handle:
+		with open(os.path.join(node_obj.dir, "5050-registrar_1__registry.json"), "r", encoding="utf-8") as json_file_handle:
 			try:
 				json_data = json.load(json_file_handle)
 
@@ -954,7 +954,7 @@ def inactive_frameworks(node_objs):
 		if not os.path.exists(os.path.join(node_obj.dir, "5050-master_state.json")):
 			continue
 
-		with open(os.path.join(node_obj.dir, "5050-master_state.json"), "r") as json_file_handle:
+		with open(os.path.join(node_obj.dir, "5050-master_state.json"), "r", encoding="utf-8") as json_file_handle:
 			try:
 				json_data = json.load(json_file_handle)
 
@@ -1003,7 +1003,7 @@ def missing_dockerd(node_objs):
 
 			continue
 
-		with open(os.path.join(node_obj.dir, "ps_aux_ww_Z.output"), "r") as ps_file:
+		with open(os.path.join(node_obj.dir, "ps_aux_ww_Z.output"), "r", encoding="utf-8") as ps_file:
 			found_dockerd = False
 
 			for each_line in ps_file:
@@ -1052,7 +1052,7 @@ def ssl_cert_error(node_objs):
 
 		mesos_log = mesos_log_list[0]
 
-		with open(mesos_log, "r") as mesos_slave_log:
+		with open(mesos_log, "r", encoding="utf-8") as mesos_slave_log:
 			for each_line in mesos_slave_log:
 				each_line = each_line.rstrip("\n")
 
@@ -1098,7 +1098,7 @@ def overlay_master_recovering(node_objs):
 
 		mesos_log = mesos_log_list[0]
 
-		with open(mesos_log, "r") as mesos_master_log:
+		with open(mesos_log, "r", encoding="utf-8") as mesos_master_log:
 			for each_line in mesos_master_log:
 				each_line = each_line.rstrip("\n")
 
