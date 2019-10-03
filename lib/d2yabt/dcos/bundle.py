@@ -106,7 +106,7 @@ def get_node_info(node_objs):
 			if os.path.exists(os.path.join(node_obj.dir, "docker_--version.output")):
 				docker_version_text = open(os.path.join(node_obj.dir, "docker_--version.output"), "r").read()
 
-				docker_version = re.search(r"Docker version (\d+\.\d+\.\d+),", docker_version_text).group(1)
+				docker_version = re.search(r"Docker version (.*),", docker_version_text).group(1)
 
 				node_obj.docker_version = docker_version
 
