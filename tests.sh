@@ -43,6 +43,20 @@ echo "	Use and existing dir and examine ..."
 yabt service_diag >/dev/null
 
 
+echo "Testing a DC/OS 2.0 diagnostic bundle"
+
+cp ${test_bundles_dir}/dcos/diag/bundle-test-2-0-0.zip .
+
+echo "	Extract and examine ..."
+yabt bundle-test-2-0-0.zip >/dev/null
+
+echo "	Detect existing dir and examine ..."
+yabt bundle-test-2-0-0.zip >/dev/null
+
+echo "	Use existing dir and examine ..."
+yabt bundle-test-2-0-0 >/dev/null
+
+
 echo "Testing a DC/OS 1.13 diagnostic bundle"
 
 cp ${test_bundles_dir}/dcos/diag/bundle-test-1-13-3.zip .
