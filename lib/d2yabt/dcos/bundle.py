@@ -131,9 +131,9 @@ def get_mesos_ids(node_objs):
 	"""
 	for node_obj in node_objs:
 		try:
-			with open(os.path.join(node_obj.dir, "5050-master_slaves.json"), "r", encoding="utf-8") as json_file:
+			with open(os.path.join(node_obj.dir, "5050-master_slaves.json"), "r", encoding="utf-8") as json_file_handle:
 				try:
-					slaves_json = json.load(json_file)
+					slaves_json = json.load(json_file_handle)
 
 				except json.decoder.JSONDecodeError:
 					print("Unable to parse master_slaves JSON from", node_obj.ip, file=sys.stderr)
@@ -145,7 +145,22 @@ def get_mesos_ids(node_objs):
 	for node_obj in node_objs:
 		node_obj.mesos_id = next((item["id"] for item in slaves_json["slaves"] if item["hostname"] == node_obj.ip), "")
 
-		print(node_obj.mesos_id)
+
+
+def get_hostnames(node_objs):
+	"""Add each node's hostname to its object.
+	"""
+	for node_obj in node_objs:
+		try:
+			with open(os.path.join(node_obj.dir, "sysctl_-a.output"), "r", encoding="utf-8") as sysctl_file_handle:
+				for each_line in sysctl_file_handle:
+					each_line = each_line.rstrip("\n")
+
+					if each_line.startswith("kernel.hostname"):
+						node_obj.hostname = each_line.split(" = ")[1]
+
+		except FileNotFoundError:
+			continue
 
 
 
@@ -154,6 +169,7 @@ def print_nodes(node_objs):
 	"""
 	node_table = pandas.DataFrame(data={
 			"IP": [o.ip for o in node_objs],
+			"Hostname": [o.hostname for o in node_objs],
 			"Mesos ID": [o.mesos_id for o in node_objs],
 			"Type": [o.type for o in node_objs],
 			"OS": [o.os for o in node_objs],

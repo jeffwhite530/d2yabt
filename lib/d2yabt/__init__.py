@@ -29,6 +29,7 @@ class Node:
 		self.dir = ""
 		self.os = ""
 		self.mesos_id = ""
+		self.hostname = ""
 		self.dcos_version = ""
 		self.docker_verison = ""
 		self.zk_fsync_warning_count = 0
