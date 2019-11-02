@@ -1078,3 +1078,58 @@ def ntp_sync(node_objs):
 
 		print(node_table)
 
+
+
+def agent_drain_deactivate(node_objs):
+	"""Check for agent deactivate or drain events.
+	"""
+	print("Checking for agent deactivate or drain events")
+
+	events = list()
+
+	for node_obj in node_objs:
+		try:
+			log_file = d2yabt.util.find_file(node_obj.dir, "dcos-mesos-master.service*")
+
+		except:
+			continue
+
+		with open(log_file, "r", encoding="utf-8") as log_file_handle:
+			for each_line in log_file_handle:
+				each_line = each_line.rstrip("\n")
+
+				match = re.search(r"(\d+-\d+-\d+) (\d+:\d+:\d+\.\d+).*Deactivating agent (.*) at slave\(1\)@(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}):5051", each_line)
+
+				if match is not None:
+					events.append((match.group(1) + " " + match.group(2), "deactivating", match.group(4)))
+
+				match = re.search(r"(\d+-\d+-\d+) (\d+:\d+:\d+\.\d+).*Reactivating agent (.*) at slave\(1\)@(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}):5051", each_line)
+
+				if match is not None:
+					events.append((match.group(1) + " " + match.group(2), "reactivating", match.group(4)))
+
+				match = re.search(r"(\d+-\d+-\d+) (\d+:\d+:\d+\.\d+).*DRAINING Agent (837544c9-cc46-4e2c-9623-a1afb2f64be3-S3)", each_line)
+
+				if match is not None:
+					events.append((match.group(1) + " " + match.group(2), "draining", match.group(3)))
+
+				match = re.search(r"(\d+-\d+-\d+) (\d+:\d+:\d+\.\d+).*Marking agent (.*) in the .* state as gone", each_line)
+
+				if match is not None:
+					events.append((match.group(1) + " " + match.group(2), "gone", match.group(3)))
+
+	# Print the node table
+	if events:
+		print(ANSI_RED_FG + "ALERT: Agent deactivate or drain events detected" + ANSI_END_FORMAT)
+
+		node_table = pandas.DataFrame(data={
+				"Time": [tup[0] for tup in events],
+				"Action": [tup[1] for tup in events],
+				"IP": [tup[2] for tup in events]
+			}
+		)
+
+		node_table.index += 1
+
+		print(node_table)
+

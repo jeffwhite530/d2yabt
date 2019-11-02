@@ -106,6 +106,7 @@ if __name__ == "__main__":
 
 	if bundle_type in ("dcos_diag", "dcos_oneliner"):
 		d2yabt.dcos.check.unreachable_agents_mesos_log(node_objs)
+		d2yabt.dcos.check.agent_drain_deactivate(node_objs)
 		d2yabt.dcos.check.mesos_leader_changes(node_objs)
 		d2yabt.dcos.check.zk_leader_changes(node_objs)
 		d2yabt.dcos.check.marathon_leader_changes(node_objs)
