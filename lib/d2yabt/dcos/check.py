@@ -11,6 +11,7 @@ import re
 import datetime
 import glob
 import pandas
+import d2yabt
 
 
 
@@ -178,20 +179,14 @@ def unreachable_agents_mesos_log(node_objs):
 	unreachable_nodes = list()
 
 	for node_obj in node_objs:
-		if not node_obj.type == "master":
+		try:
+			log_file = d2yabt.util.find_file(node_obj.dir, "dcos-mesos-master.service*")
+
+		except:
 			continue
 
-		mesos_log_list = glob.glob(os.path.join(node_obj.dir, "dcos-mesos-master.service*"))
-
-		if not len(mesos_log_list) == 1:
-			print("Unable to find log for dcos-mesos-master.service on", node_obj.ip, "(got", len(mesos_log_list), "matches)")
-
-			continue
-
-		mesos_log = mesos_log_list[0]
-
-		with open(mesos_log, "r", encoding="utf-8") as mesos_master_log:
-			for each_line in mesos_master_log:
+		with open(log_file, "r", encoding="utf-8") as log_file_handle:
+			for each_line in log_file_handle:
 				each_line = each_line.rstrip("\n")
 
 				if re.search(r"Marking agent.*unreachable", each_line) is None:
@@ -303,22 +298,16 @@ def kmem_presence(node_objs):
 	kmem_error_nodes = list()
 
 	for node_obj in node_objs:
-		if node_obj.type == "master":
+		try:
+			log_file = d2yabt.util.find_file(node_obj.dir, "dmesg*")
+
+		except:
 			continue
-
-		dmesg_file_list = glob.glob(os.path.join(node_obj.dir, "dmesg*"))
-
-		if not len(dmesg_file_list) == 1:
-			print("Unable to find dmesg file on", node_obj.ip, "(got", len(dmesg_file_list), "matches)")
-
-			continue
-
-		dmesg_file = dmesg_file_list[0]
 
 		kmem_slub_error_count = 0
 
-		with open(dmesg_file, "r", encoding="utf-8") as dmesg_file_handle:
-			for each_line in dmesg_file_handle:
+		with open(log_file, "r", encoding="utf-8") as log_file_handle:
+			for each_line in log_file_handle:
 				each_line = each_line.rstrip("\n")
 
 				if re.search("SLUB: Unable to allocate memory on node -1", each_line) is not None:
@@ -354,20 +343,14 @@ def zk_fsync(node_objs):
 	zk_fsync_node_objs = list()
 
 	for node_obj in node_objs:
-		if not node_obj.type == "master":
+		try:
+			log_file = d2yabt.util.find_file(node_obj.dir, "dcos-exhibitor.service*")
+
+		except:
 			continue
 
-		exhibitor_log_list = glob.glob(os.path.join(node_obj.dir, "dcos-exhibitor.service*"))
-
-		if not len(exhibitor_log_list) == 1:
-			print("Unable to find log for dcos-exhibitor.service on", node_obj.ip, "(got", len(exhibitor_log_list), "matches)")
-
-			continue
-
-		exhibitor_log = exhibitor_log_list[0]
-
-		with open(exhibitor_log, "r", encoding="utf-8") as zk_file_handle:
-			for each_line in zk_file_handle:
+		with open(log_file, "r", encoding="utf-8") as log_file_handle:
+			for each_line in log_file_handle:
 				each_line = each_line.rstrip("\n")
 
 				match = re.search(r"fsync-ing the write ahead log in SyncThread:\d+ took\s(\d+)ms", each_line)
@@ -407,20 +390,14 @@ def zk_diskspace(node_objs):
 	zk_diskspace_nodes = list()
 
 	for node_obj in node_objs:
-		if not node_obj.type == "master":
+		try:
+			log_file = d2yabt.util.find_file(node_obj.dir, "dcos-exhibitor.service*")
+
+		except:
 			continue
 
-		exhibitor_log_list = glob.glob(os.path.join(node_obj.dir, "dcos-exhibitor.service*"))
-
-		if not len(exhibitor_log_list) == 1:
-			print("Unable to find log for dcos-exhibitor.service on", node_obj.ip, "(got", len(exhibitor_log_list), "matches)")
-
-			continue
-
-		exhibitor_log = exhibitor_log_list[0]
-
-		with open(exhibitor_log, "r", encoding="utf-8") as zk_file_handle:
-			for each_line in zk_file_handle:
+		with open(log_file, "r", encoding="utf-8") as log_file_handle:
+			for each_line in log_file_handle:
 				each_line = each_line.rstrip("\n")
 
 				if re.search("No space left on device", each_line) is not None:
@@ -453,20 +430,14 @@ def zk_connection_exception(node_objs):
 	zk_connection_exceptions = dict()
 
 	for node_obj in node_objs:
-		if not node_obj.type == "master":
+		try:
+			log_file = d2yabt.util.find_file(node_obj.dir, "dcos-exhibitor.service*")
+
+		except:
 			continue
 
-		exhibitor_log_list = glob.glob(os.path.join(node_obj.dir, "dcos-exhibitor.service*"))
-
-		if not len(exhibitor_log_list) == 1:
-			print("Unable to find log for dcos-exhibitor.service on", node_obj.ip, "(got", len(exhibitor_log_list), "matches)")
-
-			continue
-
-		exhibitor_log = exhibitor_log_list[0]
-
-		with open(exhibitor_log, "r", encoding="utf-8") as zk_file_handle:
-			for each_line in zk_file_handle:
+		with open(log_file, "r", encoding="utf-8") as log_file_handle:
+			for each_line in log_file_handle:
 				each_line = each_line.rstrip("\n")
 
 				if re.search(r"Unexpected exception, tries=3, connecting to", each_line) is None:
@@ -509,17 +480,14 @@ def oom_presence(node_objs):
 	oom_node_objs = list()
 
 	for node_obj in node_objs:
-		dmesg_file_list = glob.glob(os.path.join(node_obj.dir, "dmesg*"))
+		try:
+			log_file = d2yabt.util.find_file(node_obj.dir, "dmesg*")
 
-		if not len(dmesg_file_list) == 1:
-			print("Unable to find dmesg file on", node_obj.ip, "(got", len(dmesg_file_list), "matches)")
-
+		except:
 			continue
 
-		dmesg_file = dmesg_file_list[0]
-
-		with open(dmesg_file, "r", encoding="utf-8") as dmesg_file_handle:
-			for each_line in dmesg_file_handle:
+		with open(log_file, "r", encoding="utf-8") as log_file_handle:
+			for each_line in log_file_handle:
 				each_line = each_line.rstrip("\n")
 
 				match = re.search(r"Killed process \d+ \(([^\s]+)\)", each_line)
@@ -560,20 +528,14 @@ def crdb_underrep_ranges(node_objs):
 	underrep_ranges_nodes = list()
 
 	for node_obj in node_objs:
-		if not node_obj.type == "master":
+		try:
+			log_file = d2yabt.util.find_file(node_obj.dir, "dcos-checks-poststart.service*")
+
+		except:
 			continue
 
-		poststart_log_list = glob.glob(os.path.join(node_obj.dir, "dcos-checks-poststart.service*"))
-
-		if not len(poststart_log_list) == 1:
-			print("Unable to find dcos-checks-poststart.service log on", node_obj.ip, "(got", len(poststart_log_list), "matches)")
-
-			continue
-
-		poststart_log = poststart_log_list[0]
-
-		with open(poststart_log, "r", encoding="utf-8") as poststart_file:
-			for each_line in poststart_file:
+		with open(log_file, "r", encoding="utf-8") as log_file_handle:
+			for each_line in log_file_handle:
 				each_line = each_line.rstrip("\n")
 
 				if re.search("CockroachDB has underreplicated ranges", each_line) is not None:
@@ -606,22 +568,16 @@ def crdb_monotonicity_error(node_objs):
 	crdb_timesync_nodes = list()
 
 	for node_obj in node_objs:
-		if not node_obj.type == "master":
+		try:
+			log_file = d2yabt.util.find_file(node_obj.dir, "dcos-cockroach.service*")
+
+		except:
 			continue
-
-		crdb_log_list = glob.glob(os.path.join(node_obj.dir, "dcos-cockroach.service*"))
-
-		if not len(crdb_log_list) == 1:
-			print("Unable to find dcos-cockroach.service log on", node_obj.ip, "(got", len(crdb_log_list), "matches)")
-
-			continue
-
-		crdb_log = crdb_log_list[0]
 
 		error_count = 0
 
-		with open(crdb_log, "r", encoding="utf-8") as crdb_log_handle:
-			for each_line in crdb_log_handle:
+		with open(log_file, "r", encoding="utf-8") as log_file_handle:
+			for each_line in log_file_handle:
 				each_line = each_line.rstrip("\n")
 
 				if re.search("to ensure monotonicity", each_line) is not None:
@@ -656,22 +612,16 @@ def crdb_contact_error(node_objs):
 	crdb_contact_error_nodes = list()
 
 	for node_obj in node_objs:
-		if not node_obj.type == "master":
+		try:
+			log_file = d2yabt.util.find_file(node_obj.dir, "dcos-cockroach.service*")
+
+		except:
 			continue
-
-		crdb_log_list = glob.glob(os.path.join(node_obj.dir, "dcos-cockroach.service*"))
-
-		if not len(crdb_log_list) == 1:
-			print("Unable to find dcos-cockroach.service log on", node_obj.ip, "(got", len(crdb_log_list), "matches)")
-
-			continue
-
-		crdb_log = crdb_log_list[0]
 
 		error_count = 0
 
-		with open(crdb_log, "r", encoding="utf-8") as crdb_log_handle:
-			for each_line in crdb_log_handle:
+		with open(log_file, "r", encoding="utf-8") as log_file_handle:
+			for each_line in log_file_handle:
 				each_line = each_line.rstrip("\n")
 
 				if re.search("unable to contact the other nodes", each_line) is not None:
@@ -725,20 +675,14 @@ def mesos_leader_changes(node_objs):
 	leader_changes = list()
 
 	for node_obj in node_objs:
-		if not node_obj.type == "master":
+		try:
+			log_file = d2yabt.util.find_file(node_obj.dir, "dcos-mesos-master.service*")
+
+		except:
 			continue
 
-		mesos_log_list = glob.glob(os.path.join(node_obj.dir, "dcos-mesos-master.service*"))
-
-		if not len(mesos_log_list) == 1:
-			print("Unable to find log for dcos-mesos-master.service on", node_obj.ip, "(got", len(mesos_log_list), "matches)")
-
-			continue
-
-		mesos_log = mesos_log_list[0]
-
-		with open(mesos_log, "r", encoding="utf-8") as mesos_master_log:
-			for each_line in mesos_master_log:
+		with open(log_file, "r", encoding="utf-8") as log_file_handle:
+			for each_line in log_file_handle:
 				each_line = each_line.rstrip("\n")
 
 				if re.search(r"new leading master", each_line) is None:
@@ -781,20 +725,14 @@ def zk_leader_changes(node_objs):
 	leader_changes = list()
 
 	for node_obj in node_objs:
-		if not node_obj.type == "master":
+		try:
+			log_file = d2yabt.util.find_file(node_obj.dir, "dcos-exhibitor.service*")
+
+		except:
 			continue
 
-		exhibitor_log_list = glob.glob(os.path.join(node_obj.dir, "dcos-exhibitor.service*"))
-
-		if not len(exhibitor_log_list) == 1:
-			print("Unable to find log for dcos-exhibitor.service on", node_obj.ip, "(got", len(exhibitor_log_list), "matches)")
-
-			continue
-
-		exhibitor_log = exhibitor_log_list[0]
-
-		with open(exhibitor_log, "r", encoding="utf-8") as exhibitor_log_handle:
-			for each_line in exhibitor_log_handle:
+		with open(log_file, "r", encoding="utf-8") as log_file_handle:
+			for each_line in log_file_handle:
 				each_line = each_line.rstrip("\n")
 
 				if re.search(r"LEADING$", each_line) is None:
@@ -836,20 +774,14 @@ def marathon_leader_changes(node_objs):
 	leader_changes = list()
 
 	for node_obj in node_objs:
-		if not node_obj.type == "master":
+		try:
+			log_file = d2yabt.util.find_file(node_obj.dir, "dcos-marathon.service*")
+
+		except:
 			continue
 
-		marathon_log_list = glob.glob(os.path.join(node_obj.dir, "dcos-marathon.service*"))
-
-		if not len(marathon_log_list) == 1:
-			print("Unable to find log for dcos-marathon.service on", node_obj.ip, "(got", len(marathon_log_list), "matches)")
-
-			continue
-
-		marathon_log = marathon_log_list[0]
-
-		with open(marathon_log, "r", encoding="utf-8") as marathon_log_handle:
-			for each_line in marathon_log_handle:
+		with open(log_file, "r", encoding="utf-8") as log_file_handle:
+			for each_line in log_file_handle:
 				each_line = each_line.rstrip("\n")
 
 				if re.search(r"Leader won:", each_line) is None:
@@ -892,15 +824,15 @@ def unreachable_agents_mesos_state(node_objs):
 	unreachable_agents = list()
 
 	for node_obj in node_objs:
-		if not node_obj.type == "master":
+		try:
+			registrar_file = d2yabt.util.find_file(node_obj.dir, "5050-registrar_1__registry.json")
+
+		except:
 			continue
 
-		if not os.path.exists(os.path.join(node_obj.dir, "5050-registrar_1__registry.json")):
-			continue
-
-		with open(os.path.join(node_obj.dir, "5050-registrar_1__registry.json"), "r", encoding="utf-8") as json_file_handle:
+		with open(registrar_file, "r", encoding="utf-8") as registrar_file_handle:
 			try:
-				json_data = json.load(json_file_handle)
+				json_data = json.load(registrar_file_handle)
 
 			except json.decoder.JSONDecodeError:
 				print("Unable to check for unreachable agents, failed to parse 5050-registrar_1__registry.json", file=sys.stderr)
@@ -948,15 +880,15 @@ def inactive_frameworks(node_objs):
 	inactive_frameworks_list = list()
 
 	for node_obj in node_objs:
-		if not node_obj.type == "master":
+		try:
+			state_file = d2yabt.util.find_file(node_obj.dir, "5050-master_state.json")
+
+		except:
 			continue
 
-		if not os.path.exists(os.path.join(node_obj.dir, "5050-master_state.json")):
-			continue
-
-		with open(os.path.join(node_obj.dir, "5050-master_state.json"), "r", encoding="utf-8") as json_file_handle:
+		with open(state_file, "r", encoding="utf-8") as state_file_handle:
 			try:
-				json_data = json.load(json_file_handle)
+				json_data = json.load(state_file_handle)
 
 			except json.decoder.JSONDecodeError:
 				print("Unable to check for inactive frameworks, failed to parse 5050-master_state.json", file=sys.stderr)
@@ -998,15 +930,16 @@ def missing_dockerd(node_objs):
 		if node_obj.type == "master":
 			continue
 
-		if not os.path.exists(os.path.join(node_obj.dir, "ps_aux_ww_Z.output")):
-			print("Unable to check for missing Docker daemon on", node_obj.ip + ", no ps output available")
+		try:
+			ps_output = d2yabt.util.find_file(node_obj.dir, "ps_aux_ww_Z.output")
 
+		except:
 			continue
 
-		with open(os.path.join(node_obj.dir, "ps_aux_ww_Z.output"), "r", encoding="utf-8") as ps_file:
+		with open(ps_output, "r", encoding="utf-8") as ps_output_handle:
 			found_dockerd = False
 
-			for each_line in ps_file:
+			for each_line in ps_output_handle:
 				if re.search("dockerd", each_line) is not None:
 					found_dockerd = True
 
@@ -1040,20 +973,14 @@ def ssl_cert_error(node_objs):
 	ssl_error_nodes = list()
 
 	for node_obj in node_objs:
-		if not node_obj.type.endswith("agent"):
+		try:
+			log_file = d2yabt.util.find_file(node_obj.dir, "dcos-mesos-slave*.service*")
+
+		except:
 			continue
 
-		mesos_log_list = glob.glob(os.path.join(node_obj.dir, "dcos-mesos-slave*.service*"))
-
-		if not len(mesos_log_list) == 1:
-			print("Unable to find log for dcos-mesos-slave*.service on", node_obj.ip, "(got", len(mesos_log_list), "matches)")
-
-			continue
-
-		mesos_log = mesos_log_list[0]
-
-		with open(mesos_log, "r", encoding="utf-8") as mesos_slave_log:
-			for each_line in mesos_slave_log:
+		with open(log_file, "r", encoding="utf-8") as log_file_handle:
+			for each_line in log_file_handle:
 				each_line = each_line.rstrip("\n")
 
 				match = re.search(r"SSL certificate problem: (.*)$", each_line)
@@ -1086,20 +1013,14 @@ def overlay_master_recovering(node_objs):
 	overlay_error_nodes = list()
 
 	for node_obj in node_objs:
-		if not node_obj.type == "master":
+		try:
+			log_file = d2yabt.util.find_file(node_obj.dir, "dcos-mesos-master.service*")
+
+		except:
 			continue
 
-		mesos_log_list = glob.glob(os.path.join(node_obj.dir, "dcos-mesos-master.service*"))
-
-		if not len(mesos_log_list) == 1:
-			print("Unable to find log for dcos-mesos-master.service on", node_obj.ip, "(got", len(mesos_log_list), "matches)")
-
-			continue
-
-		mesos_log = mesos_log_list[0]
-
-		with open(mesos_log, "r", encoding="utf-8") as mesos_master_log:
-			for each_line in mesos_master_log:
+		with open(log_file, "r", encoding="utf-8") as log_file_handle:
+			for each_line in log_file_handle:
 				each_line = each_line.rstrip("\n")
 
 				if re.search("RECOVERING", each_line) is None:
@@ -1134,10 +1055,13 @@ def ntp_sync(node_objs):
 	ntp_sync_nodes = list()
 
 	for node_obj in node_objs:
-		if not glob.glob(os.path.join(node_obj.dir, "timedatectl.output")):
+		try:
+			timedatectl = d2yabt.util.find_file(node_obj.dir, "timedatectl.output")
+
+		except:
 			continue
 
-		timedatectl_text = open(os.path.join(node_obj.dir, "timedatectl.output"), "r").read()
+		timedatectl_text = open(timedatectl, "r").read()
 
 		if re.search(r"NTP synchronized: yes", timedatectl_text) is None:
 			ntp_sync_nodes.append(node_obj)

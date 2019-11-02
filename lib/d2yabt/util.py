@@ -12,6 +12,7 @@ import json
 import zipfile
 import tarfile
 import subprocess
+import glob
 
 
 
@@ -237,4 +238,17 @@ def relocate_bundle(bundle_name):
 		return bundle_name_base
 
 	return bundle_name
+
+
+
+def find_file(directory, file_glob):
+	"""Find a file name.
+	"""
+	file_list = glob.glob(os.path.join(directory, file_glob))
+
+	if file_list:
+		return file_list[0]
+
+	else:
+		raise Exception("Failed to find requested file")
 
