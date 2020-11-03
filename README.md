@@ -5,17 +5,6 @@ d2yabt (Yet Another Bundle Tool) is used to analyze [DC/OS diagnostic bundles](h
 
 *d2yabt is neither supported nor endorsed by [D2iQ](https://d2iq.com).*
 
-### To install
-d2yabt is on PyPI so install it via pip:
-```
-pip3 install d2yabt
-```
-
-You could use the Docker image if you prefer:
-```
-docker run --rm -it -v path/to/bundle:/mnt/bundle jwhitemeso/d2yabt:latest bash
-```
-
 ### To run
 d2yabt's executable is `yabt`.  Run it with a bundle as the argument and d2yabt will extract the bundle to the current working directory and move the bundle file to the current directory:
 ```
